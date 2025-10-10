@@ -9,7 +9,7 @@
       <ul class="navbar-nav mx-auto">
         <li class="nav-item"><a class="nav-link" href="#">BERANDA</a></li>
         <li class="nav-item"><a class="nav-link" href="#">BELANJA</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">TENTANG</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ route('about') }}">TENTANG</a></li>
       </ul>
       <div class="d-flex">
           <a href="#" class="nav-link me-3">Keranjang</a>

@@ -7,7 +7,7 @@
     <a class="navbar-brand" href="#" style="font-family: 'Playfair Display', serif;">Gema Sandang</a>
     <div class="collapse navbar-collapse">
       <ul class="navbar-nav mx-auto">
-        <li class="nav-item"><a class="nav-link" href="#">BERANDA</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">BERANDA</a></li>
         <li class="nav-item"><a class="nav-link" href="#">BELANJA</a></li>
         <li class="nav-item"><a class="nav-link" href="#">TENTANG</a></li>
       </ul>
