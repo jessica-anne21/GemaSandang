@@ -1,28 +1,20 @@
-@extends('layouts.app')
+@extends('layouts.main')
 
 @section('content')
 
-<nav class="navbar navbar-expand-lg" style="background-color: #f3f1ea;">
-  <div class="container">
-    <a class="navbar-brand" href="#" style="font-family: 'Playfair Display', serif;">Gema Sandang</a>
-    <div class="collapse navbar-collapse">
-      <ul class="navbar-nav mx-auto">
-        <li class="nav-item"><a class="nav-link" href="{{ route('home') }}">BERANDA</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">BELANJA</a></li>
-        <li class="nav-item"><a class="nav-link" href="#">TENTANG</a></li>
-      </ul>
-      <div class="d-flex">
-          <a href="#" class="nav-link me-3">Keranjang</a>
-          <a href="#" class="nav-link">Masuk</a>
-      </div>
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+
+            <img src="{{ asset('images/logo.png') }}" alt="Gema Sandang Logo" class="mb-1" style="max-width: 300px;">
+            <p class="lead my-4 text-justify">
+                Gema Sandang lahir dari kecintaan kami terhadap fashion yang berkelanjutan dan unik. Kami percaya bahwa setiap pakaian memiliki cerita dan layak mendapatkan kesempatan kedua.
+            </p>
+            <p class="text-justify">
+                Misi kami adalah menyediakan pakaian <i>pre-loved</i> berkualitas tinggi yang telah dikurasi dengan cermat, memberikan Anda gaya yang khas tanpa membebani lingkungan. Bergabunglah dengan kami dalam gerakan <i>slow fashion</i> dan <b>temukan harta karun Anda berikutnya.</b>
+            </p>
+        </div>
     </div>
-  </div>
-</nav>
-
-<div class="container my-5 text-center">
-    <h1 class="display-3 text-burgundy" style="font-family: 'Playfair Display', serif;">Tentang Gema Sandang</h1>
-    <p class="lead text-charcoal" style="font-family: 'Lato', sans-serif;">Gema Sandang adalah <i>thrift shop</i> yang didirikan untuk menjual pakaian <i>secondhand</i>.</p>
 </div>
-
 
 @endsection
