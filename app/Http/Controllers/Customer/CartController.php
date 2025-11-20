@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product; 
 
@@ -16,7 +17,7 @@ class CartController extends Controller
         $cart = session()->get('cart', []);
 
         // Kirim data ke view
-        return view('cart', compact('cart'));
+        return view('customer.cart', compact('cart'));
     }
 
     /**

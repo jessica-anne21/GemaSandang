@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Customer;
+
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product; 
 
@@ -15,7 +17,7 @@ class HomeController extends Controller
         $products = Product::with('category')->latest()->take(8)->get();
 
         // 3. Kirim data produk ke view
-        return view('home', compact('products'));
+        return view('customer.home', compact('products'));
     }
 
     /**
@@ -23,6 +25,6 @@ class HomeController extends Controller
      */
     public function about()
     {
-        return view('about');
+        return view('customer.about');
     }
 }

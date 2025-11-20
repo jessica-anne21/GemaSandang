@@ -45,7 +45,13 @@
     <div>
         <h1 class="display-3">Gema Sandang</h1>
         <p class="lead">Pakaian 2<sup>nd</sup> berkualitas</p>
-        
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-8 col-lg-6"> 
+                @include('layouts.partials.search-bar')
+            </div>
+        </div>
+
         <div class->
             <a href="#koleksi-terbaru" class="scroll-down-link" aria-label="Lihat koleksi">
                 <i class="bi bi-chevron-down"></i>

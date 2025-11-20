@@ -17,6 +17,12 @@
 @section('content')
 
 <div class="container my-5">
+
+<div class="row justify-content-center mb-4">
+        <div class="col-md-6">
+             @include('layouts.partials.search-bar')
+        </div>
+    </div>
     
     <div class="row text-center mb-5"> 
         <div class="col">

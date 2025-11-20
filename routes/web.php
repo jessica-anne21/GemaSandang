@@ -2,10 +2,10 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\CartController; 
-use App\Http\Controllers\ShopController;
-use App\Http\Controllers\OrderController; 
+use App\Http\Controllers\Customer\HomeController;
+use App\Http\Controllers\Customer\ShopController;
+use App\Http\Controllers\Customer\CartController;
+use App\Http\Controllers\Customer\OrderController;
 use App\Http\Controllers\Admin\Auth\LoginController as AdminLoginController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -33,9 +33,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->name('dashboard');
 
     Route::resource('categories', CategoryController::class)->except(['show']);
-
     Route::resource('products', ProductController::class);
-
     Route::resource('orders', AdminOrderController::class)->only([
         'index', 'show', 'update'
     ]);
@@ -47,7 +45,7 @@ Route::get('/about', [HomeController::class, 'about'])->name('about');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/produk/{product}', [ShopController::class, 'show'])->name('product.show');
-
+Route::get('/search', [ShopController::class, 'search'])->name('product.search');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/order-history', [OrderController::class, 'index'])->name('orders.index');
@@ -63,10 +61,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
 Route::get('/cart', [CartController::class, 'index'])->middleware('auth')->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'store'])->name('cart.store');
 Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-
 
 require __DIR__.'/auth.php';
