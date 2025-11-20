@@ -38,14 +38,13 @@ class LoginController extends Controller
         // Kredensial benar, sekarang cek rolenya
         $user = Auth::user();
         if ($user->role !== 'admin') {
-            // Jika BUKAN admin (misal: customer coba login)
-            Auth::logout(); // Logout paksa
+            Auth::logout(); 
             throw ValidationException::withMessages([
                 'email' => 'Anda tidak memiliki hak akses admin.',
             ]);
         }
 
-        // SUKSES: Kredensial benar DAN rolenya admin
+        // Kredensial benar DAN rolenya admin
         $request->session()->regenerate();
         return redirect()->intended(route('admin.dashboard'));
     }
