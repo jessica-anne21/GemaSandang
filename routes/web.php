@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Customer\CheckoutController;
+
 
 
 Route::get('/kategori/{category}', [ShopController::class, 'showByCategory'])->name('category.show');
@@ -49,7 +51,14 @@ Route::get('/search', [ShopController::class, 'search'])->name('product.search')
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/order-history', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
+    Route::post('/checkout/payment/{order}', [CheckoutController::class, 'uploadProof'])->name('checkout.payment.upload');
+    // Di dalam grup middleware 'auth' customer
+    Route::post('/orders/{order}/complete', [OrderController::class, 'markAsCompleted'])->name('orders.complete');
 });
+
 
 Route::get('/dashboard', function () {
     return view('dashboard');

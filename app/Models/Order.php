@@ -8,14 +8,26 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     use HasFactory;
-    
-    // Relasi: Satu pesanan dimiliki oleh satu User
+
+    protected $fillable = [
+        'user_id',
+        'total_harga',
+        'status',
+        'alamat_pengiriman',
+        'kurir',
+        'layanan', // Tambahkan ini jika ingin diisi
+        'ongkir',
+        'nomor_resi',
+        'bukti_bayar',
+        'tanggal_diterima',
+        'nomor_hp',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
-    // Relasi: Satu pesanan memiliki banyak Item
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);

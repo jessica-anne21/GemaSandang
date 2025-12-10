@@ -45,6 +45,19 @@
     </div>
 </div>
 
+<div class="col-lg-4 col-md-6 mb-4">
+    <div class="card stat-card stat-card-warning">
+        <div class="card-body">
+            <div>
+                <h5 class="card-title text-uppercase text-muted small mb-1">Total Pendapatan</h5>
+                <span class="fs-2 fw-bold">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</span>
+            </div>
+            <i class="bi bi-cash-stack stat-card-icon"></i>
+        </div>
+    </div>
+</div>
+
+
 <div class="row mt-3">
 
     <div class="col-lg-7 mb-4">
@@ -53,9 +66,7 @@
                 <h5 class="mb-0">Grafik Penjualan</h5>
             </div>
             <div class="card-body">
-                <p class="text-center text-muted p-5">
-                    (Tempat untuk Chart.js atau grafik lainnya akan muncul di sini)
-                </p>
+                <canvas id="salesChart"></canvas>
             </div>
         </div>
     </div>
@@ -99,3 +110,43 @@
 </div>
 
 @endsection
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: @json($labels),
+            datasets: [{
+                label: 'Penjualan per Hari (Rp)',
+                data: @json($data),
+                fill: true,
+                tension: 0.3,
+                borderWidth: 2,
+                borderColor: '#4e73df',
+                backgroundColor: 'rgba(78, 115, 223, 0.2)',
+                pointBackgroundColor: '#4e73df',
+                pointRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true },
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: function(value) {
+                            return 'Rp ' + value.toLocaleString('id-ID');
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+@endpush

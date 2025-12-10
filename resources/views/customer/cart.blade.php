@@ -61,7 +61,9 @@
                 <tr>
                     <td colspan="5" class="text-end">
                         <a href="{{ route('shop') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Lanjutkan Belanja</a>
-                        <button class="btn btn-custom">Checkout <i class="bi bi-arrow-right"></i></button>
+                        <a href="{{ route('checkout.index') }}" class="btn btn-custom">
+                            Checkout <i class="bi bi-arrow-right"></i>
+                        </a>                   
                     </td>
                 </tr>
             </tfoot>

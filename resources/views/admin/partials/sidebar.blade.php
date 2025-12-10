@@ -24,7 +24,7 @@
             </a>
         </li>
         <li>
-            <a href="#" class="nav-link text-white {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.orders.index') }}" class="nav-link text-white {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                 <i class="bi bi-card-checklist me-2"></i>
                 Kelola Pesanan
             </a>

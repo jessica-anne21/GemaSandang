@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Product; // 1. Import Model Product
-use App\Models\Order;   // 2. Import Model Order
-use App\Models\User;    // 3. Import Model User
+use App\Models\Product; 
+use App\Models\Order;   
+use App\Models\User;    
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -15,27 +16,39 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // 1. Hitung Total Produk
+        // --- STATISTIK ---
         $totalProducts = Product::count();
 
-        // 2. Hitung Pesanan Baru (asumsi status 'pending')
         $newOrders = Order::where('status', 'pending')->count();
 
-        // 3. Hitung Total Pelanggan (yang rolenya 'customer')
         $totalCustomers = User::where('role', 'customer')->count();
 
-        // 4. Ambil 5 Pesanan Terbaru untuk ditampilkan di tabel
-        $recentOrders = Order::with('user') // Mengambil data user (untuk nama)
-                             ->latest()    // Diurutkan dari yang terbaru
-                             ->take(5)     // Ambil 5 saja
+        $recentOrders = Order::with('user')
+                             ->latest()
+                             ->take(5)
                              ->get();
 
-        // 5. Kirim semua data ini ke view
+        // --- PENJUALAN HARIAN 30 HARI ---
+        $salesPerDay = Order::selectRaw('DATE(created_at) as date, SUM(total_harga) as total')
+            ->where('status', 'selesai') // optional: hanya penjualan selesai
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->take(30)
+            ->get();
+
+        // Siapkan data untuk Chart.js
+        $labels = $salesPerDay->pluck('date');
+        $data   = $salesPerDay->pluck('total');
+        $totalRevenue = Order::where('status', 'selesai')->sum('total_harga');
+
         return view('admin.dashboard', compact(
             'totalProducts',
             'newOrders',
             'totalCustomers',
-            'recentOrders'
+            'recentOrders',
+            'labels',
+            'data',
+            'totalRevenue'
         ));
     }
 }

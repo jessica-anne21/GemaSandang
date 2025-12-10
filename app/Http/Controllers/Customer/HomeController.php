@@ -13,10 +13,10 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // 2. Ambil 8 produk paling baru
+        // Ambil 8 produk paling baru
         $products = Product::with('category')->latest()->take(8)->get();
 
-        // 3. Kirim data produk ke view
+        // Kirim data produk ke view
         return view('customer.home', compact('products'));
     }
 

@@ -56,7 +56,6 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $request->validate([
-            // Pastikan unik, KECUALI untuk dirinya sendiri
             'nama_kategori' => 'required|string|max:255|unique:categories,nama_kategori,' . $category->id,
         ]);
 
@@ -73,7 +72,7 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        // Pengecekan keamanan: Jangan hapus jika masih ada produk
+        // Pengecekan keamanan
         if ($category->products()->count() > 0) {
             return back()->with('error', 'Tidak bisa menghapus kategori ini karena masih memiliki produk terkait.');
         }

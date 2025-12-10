@@ -27,7 +27,7 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
-        // Coba lakukan otentikasi
+        // Otentikasi
         if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             // Jika kredensial salah
             throw ValidationException::withMessages([
@@ -35,7 +35,7 @@ class LoginController extends Controller
             ]);
         }
 
-        // Kredensial benar, sekarang cek rolenya
+        // Cek role
         $user = Auth::user();
         if ($user->role !== 'admin') {
             Auth::logout(); 
@@ -58,7 +58,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        // Arahkan kembali ke halaman login admin
         return redirect()->route('admin.login');
     }
 }

@@ -23,8 +23,36 @@
                                 <td>#{{ $order->id }}</td>
                                 <td>{{ $order->created_at->format('d F Y') }}</td>
                                 <td>
-                                    <span class="badge bg-success text-capitalize">{{ $order->status }}</span>
-                                </td>
+    @if($order->status == 'menunggu_pembayaran')
+        <span class="badge bg-warning text-dark">Menunggu Pembayaran</span>
+        <a href="{{ route('checkout.success', $order->id) }}" class="btn btn-sm btn-primary ms-2">Bayar</a>
+    
+    @elseif($order->status == 'menunggu_konfirmasi')
+        <span class="badge bg-info text-dark">Menunggu Konfirmasi</span>
+    
+    @elseif($order->status == 'dikirim')
+        <span class="badge bg-primary mb-2">Sedang Dikirim</span>
+        <div class="small text-muted mb-2">Resi: {{ $order->nomor_resi }}</div>
+        
+        {{-- TOMBOL KONFIRMASI TERIMA --}}
+        <form action="{{ route('orders.complete', $order->id) }}" method="POST" class="d-inline">
+            @csrf
+            {{-- Konfirmasi Javascript biar gak kepencet --}}
+            <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Apakah barang sudah benar-benar diterima dan dalam kondisi baik?')">
+                <i class="bi bi-check-circle"></i> Pesanan Diterima
+            </button>
+        </form>
+    
+    @elseif($order->status == 'selesai')
+        <span class="badge bg-success">Selesai</span>
+        <div class="small text-muted mt-1">
+            Diterima: {{ \Carbon\Carbon::parse($order->tanggal_diterima)->format('d M Y') }}
+        </div>
+    
+    @elseif($order->status == 'dibatalkan')
+        <span class="badge bg-danger">Dibatalkan</span>
+    @endif
+</td>
                                 <td class="text-end">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                                 <td class="text-end">
                                     <a href="#" class="btn btn-sm btn-outline-dark">Lihat Detail</a>
