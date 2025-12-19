@@ -27,6 +27,9 @@
             </ul>
         </li>
         <li class="nav-item"><a class="nav-link" href="{{ route('about') }}">Tentang</a></li>
+        <li class="nav-item">
+        <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Kontak</a>
+      </li>
       </ul>
 
       <div class="d-flex align-items-center">
@@ -37,8 +40,29 @@
                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
               </a>
               <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="navbarDropdown">
-                <li><a class="dropdown-item" href="{{ route('orders.index') }}">Riwayat Pesanan</a></li>                <li><a class="dropdown-item" href="{{ route('profile.edit') }}">Profil</a></li>
-                <li><hr class="dropdown-divider"></li>
+
+    <li>
+        <a class="dropdown-item d-flex justify-content-between align-items-center"
+           href="{{ route('customer.bargains.index') }}">
+            Riwayat Tawaran
+
+            {{-- badge realtime (optional) --}}
+            @if(isset($pendingBargainsCount) && $pendingBargainsCount > 0)
+                <span class="badge bg-warning text-dark rounded-pill">
+                    {{ $pendingBargainsCount }}
+                </span>
+            @endif
+        </a>
+    </li>
+
+    <li>
+        <a class="dropdown-item" href="{{ route('orders.index') }}">
+            Riwayat Pesanan
+        </a>
+    </li>
+
+    <li><hr class="dropdown-divider"></li>
+
                 <li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

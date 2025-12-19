@@ -1,6 +1,6 @@
 @extends('layouts.main')
 
-{{-- Menambahkan CSS kustom untuk efek hover kartu --}}
+{{-- Menambahkan CSS kustom untuk efek hover kartu dan Sold Out --}}
 @section('styles')
 <style>
     .product-card {
@@ -11,6 +11,34 @@
         transform: translateY(-8px); 
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; 
     }
+
+    /* NEW: Sold Out Styles */
+    .product-sold-out {
+        opacity: 0.6; /* Membuat agak transparan */
+        filter: grayscale(100%); /* Membuat jadi hitam putih / abu-abu */
+        position: relative; /* Penting untuk positioning badge */
+    }
+    .sold-out-badge {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba(141, 75, 85, 0.85); /* Warna Primary Anda dengan transparansi */
+        color: white;
+        padding: 10px 20px;
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+        z-index: 10;
+        border-radius: 5px;
+        pointer-events: none; /* Agar tidak mengganggu klik di bawahnya */
+    }
+    .product-card:hover.product-sold-out {
+        transform: translateY(-8px); /* Efek hover tetap jalan */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+        opacity: 0.6; /* Pertahankan opacity */
+        filter: grayscale(100%); /* Pertahankan grayscale */
+    }
 </style>
 @endsection
 
@@ -18,7 +46,7 @@
 
 <div class="container my-5">
 
-<div class="row justify-content-center mb-4">
+    <div class="row justify-content-center mb-4">
         <div class="col-md-6">
              @include('layouts.partials.search-bar')
         </div>
@@ -43,11 +71,20 @@
     <div class="row">
         @forelse ($products as $product)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="card h-100 border-0 shadow-sm product-card">
+                {{-- Logika Sold Out: Tambah class jika stok 0 --}}
+                <div class="card h-100 border-0 shadow-sm product-card {{ $product->stok == 0 ? 'product-sold-out' : '' }}">
 
-                    <a href="{{ route('product.show', $product) }}">
-                        <img src="{{ asset('storage/' . $product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="height: 300px; object-fit: cover;">
-                    </a>
+                    {{-- Wrapper Gambar (Penting untuk posisi SOLD OUT badge) --}}
+                    <div class="position-relative">
+                        <a href="{{ route('product.show', $product) }}">
+                            <img src="{{ asset('storage/' . $product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="height: 300px; object-fit: cover;">
+                        </a>
+
+                        {{-- Tampilkan Badge SOLD OUT jika stok 0 --}}
+                        @if($product->stok == 0)
+                            <div class="sold-out-badge">SOLD OUT</div>
+                        @endif
+                    </div>
 
                     <div class="card-body d-flex flex-column">
 
@@ -57,16 +94,17 @@
 
                         {{-- <p class="card-text text-muted">{{ $product->category->nama_kategori }}</p> --}} 
                         
-                        <p class="card-text fw-bold mt-auto" style="color: var(--primary-color);">
+                        <p class="card-text fw-bold mt-auto fs-5" style="color: var(--primary-color);">
                             Rp {{ number_format($product->harga, 0, ',', '.') }}
                         </p>
                         
                         <div class="mt-3 d-grid gap-2"> 
                             <a href="{{ route('product.show', $product) }}" class="btn btn-outline-dark">Detail</a>
                             
-                            @auth
-                            {{-- Jika sudah login, tampilkan form Add to Cart --}}
-                            <div class> 
+                            {{-- Logika Tombol Add to Cart --}}
+                            @if($product->stok > 0)
+                                @auth
+                                {{-- Jika sudah login dan stok > 0, tampilkan form Add to Cart --}}
                                 <form action="{{ route('cart.store') }}" method="POST" class="d-grid">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -74,13 +112,16 @@
                                         <i class="bi bi-cart-plus"></i> Add to Cart
                                     </button>
                                 </form>
-                            </div>
-                            @elseguest
-                            {{-- Jika masih guest, tampilkan tombol menuju Login --}}
-                            <a href="{{ route('login') }}" class="btn btn-custom">
-                                <i class="bi bi-box-arrow-in-right"></i> Login to Buy
-                            </a>
-                            @endguest
+                                @elseguest
+                                {{-- Jika masih guest, tampilkan tombol menuju Login --}}
+                                <a href="{{ route('login') }}" class="btn btn-custom">
+                                    <i class="bi bi-box-arrow-in-right"></i> Login to Buy
+                                </a>
+                                @endguest
+                            @else
+                                {{-- JIKA STOK 0, TAMPILKAN TOMBOL SOLD OUT MATI --}}
+                                <button class="btn btn-secondary" disabled>Stok Habis</button>
+                            @endif
                         </div>
 
                     </div>
@@ -88,8 +129,10 @@
             </div>
         @empty
             <div class="col-12">
-                <div class="alert alert-warning text-center">
-                    <p class="mb-0">Belum ada produk yang tersedia untuk kategori ini.</p>
+                <div class="alert alert-warning text-center py-5">
+                    <i class="bi bi-tag display-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">Belum ada produk yang tersedia untuk kategori ini.</h4>
+                    <p class="mb-0">Coba cek kategori lain atau kembali ke halaman utama.</p>
                 </div>
             </div>
         @endforelse 

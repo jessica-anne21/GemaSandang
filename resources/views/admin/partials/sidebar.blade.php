@@ -30,9 +30,16 @@
             </a>
         </li>
         <li>
-            <a href="#" class="nav-link text-white"> 
+            <a href="{{ route('admin.bargains.index') }}"
+            class="nav-link text-white {{ request()->routeIs('admin.bargains.*') ? 'active' : '' }}">
+                <i class="bi bi-hand-index-thumb me-2"></i>
+                Kelola Tawaran
+            </a>
+        </li>
+        <li>
+            <a href="{{ route('admin.customers.index') }}" class="nav-link text-white"> 
                 <i class="bi bi-people me-2"></i>
-                Pelanggan
+                Kelola Pelanggan
             </a>
         </li>
     </ul>

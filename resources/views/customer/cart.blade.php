@@ -33,7 +33,13 @@
                                     <img src="{{ asset('storage/' . $details['photo']) }}" width="100" class="img-responsive"/>
                                 </div>
                                 <div class="col-sm-9">
-                                    <h4 class="nomargin">{{ $details['name'] }}</h4>
+                                <h4 class="nomargin">
+                                    {{ $details['name'] }}
+
+                                    @if(!empty($details['from_bargain']))
+                                        <span class="badge bg-success ms-2">Harga Negosiasi</span>
+                                    @endif
+                                </h4>
                                 </div>
                             </div>
                         </td>

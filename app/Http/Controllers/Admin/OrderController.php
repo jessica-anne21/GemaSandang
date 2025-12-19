@@ -9,13 +9,22 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
     /**
-     * Menampilkan daftar semua pesanan.
+     * Menampilkan daftar semua pesanan dengan opsi filter tanggal.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil semua order, urutkan dari yang terbaru
-        // Eager load 'user' agar tidak N+1 problem saat menampilkan nama pelanggan
-        $orders = Order::with('user')->latest()->paginate(10);
+        $query = Order::with('user')->latest();
+
+        // Logika FILTER TANGGAL dari Dashboard Chart
+        if ($request->has('date')) {
+            $date = $request->date;
+            // Filter pesanan yang dibuat (created_at) pada tanggal spesifik (YYYY-MM-DD)
+            $query->whereDate('created_at', $date);
+        
+        }
+
+        // Ambil semua pesanan, urutkan dari yang terbaru dan terapkan paginasi
+        $orders = $query->paginate(10); 
 
         return view('admin.orders.index', compact('orders'));
     }
@@ -25,29 +34,30 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        // Ambil order berdasarkan ID
-        // Eager load 'items.product' untuk menampilkan detail barang
+        // Ambil pesanan berdasarkan ID beserta relasi user dan items (produk)
         $order = Order::with(['user', 'items.product'])->findOrFail($id);
 
         return view('admin.orders.show', compact('order'));
     }
 
     /**
-     * Mengupdate status pesanan (dan nomor resi).
+     * Mengupdate status pesanan dan nomor resi.
      */
     public function update(Request $request, $id)
     {
         $order = Order::findOrFail($id);
 
+        // Validasi input
         $request->validate([
-            'status' => 'required|in:pending,dikirim,selesai,dibatalkan',
-            'nomor_resi' => 'nullable|string|max:255', // Validasi nomor resi
+            // Memperbaiki status sesuai yang digunakan di aplikasi
+            'status' => 'required|in:menunggu_pembayaran,menunggu_konfirmasi,dikirim,selesai,dibatalkan',
+            'nomor_resi' => 'nullable|string|max:255',
         ]);
 
-        // Update data
+        // Update status
         $order->status = $request->status;
 
-        // Jika admin mengisi nomor resi, simpan juga
+        // Update nomor resi jika ada input (terutama jika status 'dikirim')
         if ($request->filled('nomor_resi')) {
             $order->nomor_resi = $request->nomor_resi;
         }
@@ -57,4 +67,5 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.show', $order->id)
                          ->with('success', 'Status pesanan berhasil diperbarui.');
     }
+    
 }

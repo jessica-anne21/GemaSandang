@@ -7,6 +7,7 @@
     <p class="text-muted">Ini adalah ringkasan aktivitas toko Anda hari ini.</p>
 </div>
 
+{{-- Stat Cards --}}
 <div class="row">
     <div class="col-lg-4 col-md-6 mb-4">
         <div class="card stat-card stat-card-primary">
@@ -24,8 +25,8 @@
         <div class="card stat-card stat-card-secondary">
             <div class="card-body">
                 <div>
-                    <h5 class="card-title text-uppercase text-muted small mb-1">Pesanan Baru</h5>
-                    <span class="fs-2 fw-bold">{{ $newOrders }}</span>
+                    <h5 class="card-title text-uppercase text-muted small mb-1">Total Pendapatan</h5>
+                    <span class="fs-2 fw-bold">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</span>
                 </div>
                 <i class="bi bi-card-checklist stat-card-icon"></i>
             </div>
@@ -45,21 +46,10 @@
     </div>
 </div>
 
-<div class="col-lg-4 col-md-6 mb-4">
-    <div class="card stat-card stat-card-warning">
-        <div class="card-body">
-            <div>
-                <h5 class="card-title text-uppercase text-muted small mb-1">Total Pendapatan</h5>
-                <span class="fs-2 fw-bold">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</span>
-            </div>
-            <i class="bi bi-cash-stack stat-card-icon"></i>
-        </div>
-    </div>
-</div>
-
 
 <div class="row mt-3">
 
+    {{-- Kolom Kiri: Grafik --}}
     <div class="col-lg-7 mb-4">
         <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
             <div class="card-header bg-white border-0 py-3">
@@ -71,6 +61,7 @@
         </div>
     </div>
 
+    {{-- Kolom Kanan: Pesanan Terbaru (MODIFIKASI LINK) --}}
     <div class="col-lg-5 mb-4">
         <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
             <div class="card-header bg-white border-0 py-3">
@@ -80,14 +71,20 @@
                 <table class="table table-hover align-middle mb-0">
                     <tbody>
                         @forelse ($recentOrders as $order)
-                            <tr>
+                            {{-- BARIS YANG BISA DIKLIK --}}
+                            {{-- Kita bungkus <tr> dalam <a> agar seluruh baris bisa diklik --}}
+                            <tr class="clickable-row" onclick="window.location='{{ route('admin.orders.show', $order->id) }}'" style="cursor: pointer;">
                                 <td class="p-3">
                                     <strong class="d-block">#{{ $order->id }} - {{ $order->user->name ?? 'Guest' }}</strong>
                                     <small class="text-muted">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</small>
                                 </td>
                                 <td class="text-end p-3">
-                                    @if($order->status == 'pending')
-                                        <span class="badge" style="background-color: var(--secondary-color); color: var(--bg-light);">Pending</span>
+                                    @if($order->status == 'menunggu_pembayaran')
+                                        <span class="badge bg-warning text-dark">Menunggu Bayar</span>
+                                    @elseif($order->status == 'menunggu_konfirmasi')
+                                        <span class="badge bg-info text-dark">Cek Bukti</span>
+                                    @elseif($order->status == 'dikirim')
+                                        <span class="badge bg-primary">Dikirim</span>
                                     @elseif($order->status == 'selesai')
                                         <span class="badge bg-success">Selesai</span>
                                     @else
@@ -110,43 +107,88 @@
 </div>
 
 @endsection
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    const chartLabels = @json($labels ?? []);
+    
     const ctx = document.getElementById('salesChart').getContext('2d');
 
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: @json($labels),
+            labels: chartLabels,
+            data: @json($data ?? []),
             datasets: [{
                 label: 'Penjualan per Hari (Rp)',
-                data: @json($data),
+                data: @json($data ?? []),
                 fill: true,
                 tension: 0.3,
                 borderWidth: 2,
-                borderColor: '#4e73df',
-                backgroundColor: 'rgba(78, 115, 223, 0.2)',
-                pointBackgroundColor: '#4e73df',
+                borderColor: '#8D4B55', 
+                backgroundColor: 'rgba(141, 75, 85, 0.2)', 
+                pointBackgroundColor: '#8D4B55',
                 pointRadius: 4,
             }]
         },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { display: true },
-            },
-            scales: {
-                y: {
-                    ticks: {
-                        callback: function(value) {
-                            return 'Rp ' + value.toLocaleString('id-ID');
-                        }
-                    }
+options: {
+    responsive: true,
+    plugins: {
+        legend: { display: true },
+    },
+    scales: {
+        y: {
+            ticks: {
+                callback: function(value) {
+                    return 'Rp ' + value.toLocaleString('id-ID');
                 }
             }
         }
+    },
+    
+    // ============================================================
+    // FUNGSI UNTUK MENGUBAH KURSOR MENJADI JEMPOL/POINTER
+    // ============================================================
+    onHover: (e, elements) => {
+        // Mendapatkan elemen canvas (penting untuk mengubah kursor)
+        const chartContainer = document.getElementById('salesChart');
+        if (elements.length > 0) {
+            // Jika kursor berada di atas titik data, ubah kursor menjadi tangan (pointer)
+            chartContainer.style.cursor = 'pointer'; 
+        } else {
+            // Jika kursor meninggalkan titik data, kembalikan ke kursor default
+            chartContainer.style.cursor = 'default';
+        }
+    },
+    // ============================================================
+    
+    // FUNGSI UNTUK REDIRECT SAAT DIKLIK
+    onClick: (e, elements) => {
+        if (elements.length > 0) {
+            const firstElement = elements[0];
+            const index = firstElement.index;
+            
+            // Ambil label (tanggal) dari index yang diklik
+            const clickedLabel = chartLabels[index];
+            const dateFilter = clickedLabel; 
+
+            // Redirect ke halaman daftar order dengan filter tanggal
+            const redirectUrl = `{{ route('admin.orders.index') }}?date=${dateFilter}`;
+            window.location.href = redirectUrl;
+        }
+    },
+    // Pengaturan interaksi
+    interaction: {
+        mode: 'index',
+        intersect: false,
+    },
+    hover: {
+        mode: 'nearest',
+        intersect: true
+    }
+}
     });
 </script>
 @endpush

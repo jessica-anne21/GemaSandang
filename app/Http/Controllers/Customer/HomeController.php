@@ -27,4 +27,12 @@ class HomeController extends Controller
     {
         return view('customer.about');
     }
+
+    /**
+     * Menampilkan halaman kontak.
+     */
+    public function contact()
+    {
+        return view('customer.contact');
+    }
 }

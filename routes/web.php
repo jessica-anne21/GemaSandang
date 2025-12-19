@@ -12,8 +12,9 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Customer\CheckoutController;
-
-
+use App\Http\Controllers\Admin\CustomerController;
+use App\Http\Controllers\Admin\AdminBargainController;
+use App\Http\Controllers\Customer\CustomerBargainController;
 
 Route::get('/kategori/{category}', [ShopController::class, 'showByCategory'])->name('category.show');
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -39,11 +40,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('orders', AdminOrderController::class)->only([
         'index', 'show', 'update'
     ]);
+    Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
+    Route::get('/bargains', [AdminBargainController::class, 'index'])
+            ->name('bargains.index');
+
+        // Update status tawaran (accept / reject)
+    Route::put('/bargains/{id}', [AdminBargainController::class, 'update'])
+        ->name('bargains.update');
 });
 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
+Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/produk/{product}', [ShopController::class, 'show'])->name('product.show');
@@ -55,8 +65,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
     Route::post('/checkout/payment/{order}', [CheckoutController::class, 'uploadProof'])->name('checkout.payment.upload');
-    // Di dalam grup middleware 'auth' customer
     Route::post('/orders/{order}/complete', [OrderController::class, 'markAsCompleted'])->name('orders.complete');
+    Route::post('/bargains', [CustomerBargainController::class, 'store'])
+        ->name('bargains.store');
+    Route::get('/my-bargains', [CustomerBargainController::class, 'index'])
+        ->name('customer.bargains.index');
+    Route::post('/cart/bargain', [CartController::class, 'addFromBargain'])
+    ->name('cart.add.bargain');
 });
 
 
