@@ -67,5 +67,27 @@ class OrderController extends Controller
         return redirect()->route('admin.orders.show', $order->id)
                          ->with('success', 'Status pesanan berhasil diperbarui.');
     }
+
+    public function rejectPayment(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+
+        $request->validate([
+            'catatan_admin' => 'required|string|max:255', // Alasan penolakan wajib diisi
+        ]);
+
+        // Hapus file bukti bayar lama agar user upload baru
+        if ($order->bukti_bayar) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($order->bukti_bayar);
+        }
+
+        $order->update([
+            'status' => 'menunggu_pembayaran', // Kembalikan status agar user bisa upload lagi
+            'bukti_bayar' => null, // Kosongkan bukti bayar
+            'catatan_admin' => $request->catatan_admin // Simpan alasan penolakan
+        ]);
+
+        return redirect()->back()->with('success', 'Bukti pembayaran ditolak. User diminta upload ulang.');
+    }
     
 }

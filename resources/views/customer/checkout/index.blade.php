@@ -88,9 +88,8 @@
                             @enderror
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label text-muted small text-uppercase fw-bold">Biaya Ongkir (Estimasi)</label>
+                            <label class="form-label text-muted small text-uppercase fw-bold">Biaya Ongkir</label>
                             <select name="ongkir" class="form-select @error('ongkir') is-invalid @enderror" id="ongkirSelect" required>
-                                {{-- Pastikan value default kosong atau 0 agar validasi required jalan --}}
                                 <option value="" selected disabled>Pilih lokasi tujuan</option>
                                 <option value="20000" {{ old('ongkir') == '20000' ? 'selected' : '' }}>Bandung - Rp 20.000</option>
                                 <option value="35000" {{ old('ongkir') == '35000' ? 'selected' : '' }}>Luar Bandung - Rp 35.000</option>

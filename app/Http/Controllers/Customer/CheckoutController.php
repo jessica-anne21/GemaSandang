@@ -51,12 +51,12 @@ class CheckoutController extends Controller
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'total_harga' => $grandTotal,
-                'status' => 'menunggu_pembayaran', // Status awal yang lebih jelas
+                'status' => 'menunggu_pembayaran', 
                 'alamat_pengiriman' => $request->alamat_pengiriman,
                 'kurir' => $request->kurir,
                 'ongkir' => $request->ongkir,
                 'nomor_hp' => $request->nomor_hp, 
-                // 'catatan' => $request->catatan,
+                'catatan' => $request->catatan,
             ]);
 
             // 3. Loop Barang
@@ -110,7 +110,7 @@ class CheckoutController extends Controller
             
             $order->update([
                 'bukti_bayar' => $path,
-                'status' => 'menunggu_konfirmasi' // Update status otomatis
+                'status' => 'menunggu_konfirmasi' 
             ]);
         }
 

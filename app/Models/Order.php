@@ -15,12 +15,12 @@ class Order extends Model
         'status',
         'alamat_pengiriman',
         'kurir',
-        'layanan', // Tambahkan ini jika ingin diisi
         'ongkir',
         'nomor_resi',
         'bukti_bayar',
         'tanggal_diterima',
         'nomor_hp',
+        'catatan',
     ];
 
     public function user()

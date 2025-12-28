@@ -40,6 +40,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('orders', AdminOrderController::class)->only([
         'index', 'show', 'update'
     ]);
+    Route::put('/orders/{order}/reject', [AdminOrderController::class, 'rejectPayment'])->name('orders.reject'); 
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
     Route::get('/bargains', [AdminBargainController::class, 'index'])

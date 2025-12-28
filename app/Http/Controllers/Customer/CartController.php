@@ -61,8 +61,6 @@ class CartController extends Controller
                     "quantity" => 1,
                     "price" => $product->harga,
                     "photo" => $product->foto_produk,
-                    "from_bargain" => true,
-                    "bargain_id" => $bargain->id,
 
                 ];
             }
