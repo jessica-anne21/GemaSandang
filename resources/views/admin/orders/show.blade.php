@@ -129,7 +129,7 @@
                     <div class="mt-3">
                         <label class="small text-muted fw-bold mb-1">Catatan Pelanggan</label>
                         <div class="p-3 bg-light rounded border small text-secondary">
-                            {{ $order->catatan }}
+                            {{ $order->catatan_customer }}
                         </div>
                     </div>
                 </div>

@@ -97,10 +97,24 @@
                                         <label for="harga_tawaran" class="form-label small text-muted fw-bold">Harga yang Anda Inginkan</label>
                                         <div class="input-group">
                                             <span class="input-group-text bg-white border-end-0">Rp</span>
-                                            <input type="number" name="harga_tawaran" id="harga_tawaran" class="form-control border-start-0 ps-0" 
-                                                   placeholder="Contoh: 150000" required min="1" max="{{ $product->harga - 1 }}">
+                                            
+                                            {{-- INPUT HARGA PINTAR --}}
+                                            {{-- 1. Min: 50% dari harga asli --}}
+                                            {{-- 2. Value: Mengambil dari old input atau URL parameter 'last_offer' --}}
+                                            <input type="number" 
+                                                   name="harga_tawaran" 
+                                                   id="harga_tawaran" 
+                                                   class="form-control border-start-0 ps-0" 
+                                                   placeholder="Minimal Rp {{ number_format($product->harga * 0.5, 0, ',', '.') }}" 
+                                                   value="{{ old('harga_tawaran', request('last_offer')) }}" 
+                                                   min="{{ $product->harga * 0.5 }}" 
+                                                   max="{{ $product->harga - 1 }}"
+                                                   required>
                                         </div>
-                                        <small class="text-muted mt-2 d-block">*Penawaran harus di bawah harga asli produk.</small>
+                                        {{-- Helper Text --}}
+                                        <small class="text-danger mt-2 d-block">
+                                            *Minimal tawaran: Rp {{ number_format($product->harga * 0.5, 0, ',', '.') }} (50% harga asli)
+                                        </small>
                                     </div>
                                 </div>
                                 <div class="modal-footer border-0 p-3">

@@ -7,23 +7,57 @@ use Illuminate\Http\Request;
 use App\Models\Product; 
 use App\Models\Bargain;
 
-
 class CartController extends Controller
 {
     /**
-     * Menampilkan halaman keranjang belanja.
+     * Menampilkan halaman keranjang belanja dengan "Satpam" Cerdas.
      */
     public function index()
     {
-        // Ambil data keranjang dari session
         $cart = session()->get('cart', []);
+        $changes = false; // Penanda ada perubahan atau ngga
+        $removedItems = []; // Daftar barang yang dihapus
 
-        // Kirim data ke view
+        // === LOGIKA "SATPAM KERANJANG" ===
+        // Kita loop manual agar bisa unset (hapus) item
+        foreach ($cart as $key => $details) {
+            
+            // 1. Cek apakah item ini hasil tawar-menawar?
+            if (isset($details['bargain_id'])) {
+                // Cari data tawaran terbaru di Database
+                $bargain = \App\Models\Bargain::find($details['bargain_id']);
+                
+                // HAPUS JIKA:
+                // A. Data tawarannya udah dihapus admin dari DB (null)
+                // B. Statusnya berubah jadi 'rejected' (Dibatalkan Admin)
+                // C. Statusnya masih 'pending' (Aneh, tapi jaga-jaga)
+                if (!$bargain || $bargain->status !== 'accepted') {
+                    unset($cart[$key]); // Tendang dari keranjang
+                    $changes = true;
+                    $removedItems[] = $details['name'];
+                }
+            }
+            
+            // 2. Cek Stok (Jaga-jaga kalau stok real-time habis dibeli orang lain)
+            $productDB = \App\Models\Product::find($key);
+            if (!$productDB || $productDB->stok < 1) {
+                 unset($cart[$key]);
+                 $changes = true;
+                 $removedItems[] = $details['name'] . ' (Stok Habis)';
+            }
+        }
+
+        // Jika ada yang dihapus, update session & kasih notif
+        if ($changes) {
+            session()->put('cart', $cart);
+            session()->flash('warning', 'Beberapa item dihapus dari keranjang karena penawaran dibatalkan atau stok habis: ' . implode(', ', $removedItems));
+        }
+
         return view('customer.cart', compact('cart'));
     }
 
     /**
-     * Menyimpan produk baru ke dalam keranjang (session).
+     * Menyimpan produk baru ke dalam keranjang (Normal Price).
      */
     public function store(Request $request)
     {
@@ -32,84 +66,76 @@ class CartController extends Controller
         ]);
 
         $product = Product::findOrFail($request->product_id);
-
         $cart = session()->get('cart', []);
 
         // Cek apakah produk sudah ada di keranjang
         if (isset($cart[$product->id])) {
-
-            // Dapatkan kuantitas saat ini di keranjang
-            $currentQuantityInCart = $cart[$product->id]['quantity'];
-
-            // Cek apakah kuantitas di keranjang SUDAH SAMA DENGAN stok
-            if ($currentQuantityInCart >= $product->stok) {
-                return redirect()->back()->with('warning', 'Stok produk "' . $product->nama_produk . '" hanya ' . $product->stok . ', Anda tidak bisa menambahkan lagi.');
-            } else {
-                $cart[$product->id]['quantity']++;
+            // Cek stok
+            if ($cart[$product->id]['quantity'] >= $product->stok) {
+                return redirect()->back()->with('warning', 'Stok produk "' . $product->nama_produk . '" mentok, tidak bisa tambah lagi.');
             }
-
+            $cart[$product->id]['quantity']++;
         } else {
-
-            // Cek apakah stok produk masih ada (> 0)
+            // Cek stok awal
             if ($product->stok < 1) {
-                // Jika stok habis, kembalikan dengan pesan error.
-                return redirect()->back()->with('error', 'Maaf, stok produk "' . $product->nama_produk . '" sudah habis.');
-            } else {
-                // Jika stok ada, tambahkan produk ke keranjang dengan kuantitas 1
-                $cart[$product->id] = [
-                    "name" => $product->nama_produk,
-                    "quantity" => 1,
-                    "price" => $product->harga,
-                    "photo" => $product->foto_produk,
-
-                ];
+                return redirect()->back()->with('error', 'Maaf, stok produk habis.');
             }
+            
+            // Simpan pakai Product ID sebagai Key
+            $cart[$product->id] = [
+                "name" => $product->nama_produk,
+                "quantity" => 1,
+                "price" => $product->harga,
+                "photo" => $product->foto_produk,
+                // Tidak ada bargain_id karena ini harga normal
+            ];
         }
 
         session()->put('cart', $cart);
-
         return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang!');
     }
 
+    /**
+     * Menyimpan produk HASIL NEGO ke keranjang (Bargain Price).
+     */
+    public function addFromBargain(Request $request)
+    {
+        $bargain = Bargain::with('product')
+            ->where('id', $request->bargain_id)
+            ->where('user_id', auth()->id())
+            ->where('status', 'accepted')
+            ->firstOrFail();
 
-public function addFromBargain(Request $request)
-{
-    $bargain = Bargain::with('product')
-        ->where('id', $request->bargain_id)
-        ->where('user_id', auth()->id())
-        ->where('status', 'accepted')
-        ->firstOrFail();
+        $cart = session()->get('cart', []);
 
-    $cart = session()->get('cart', []);
+        // Gunakan ID Produk sebagai Key agar kompatibel dengan sistem checkout
+        $cartKey = $bargain->product->id; 
 
-    $cartKey = 'bargain_' . $bargain->id;
-
-    if (!isset($cart[$cartKey])) {
+        // Isi cart dengan data bargain
         $cart[$cartKey] = [
             'name' => $bargain->product->nama_produk,
             'quantity' => 1,
-            'price' => $bargain->harga_tawaran, // 🔥 harga deal
+            'price' => $bargain->harga_tawaran, // 🔥 Pakai Harga Deal
             'photo' => $bargain->product->foto_produk,
-            'from_bargain' => true,
-            'bargain_id' => $bargain->id,
-            'product_id' => $bargain->product->id,
+            'is_bargain' => true, 
+            'bargain_id' => $bargain->id, // <--- [PENTING] INI KUNCI BUAT "SATPAM" BEKERJA!
         ];
+
+        session()->put('cart', $cart);
+
+        return redirect()->route('cart.index')
+            ->with('success', 'Produk hasil tawar berhasil dimasukkan ke keranjang dengan harga spesial!');
     }
 
-    session()->put('cart', $cart);
-
-    return redirect()->route('cart.index')
-        ->with('success', 'Produk hasil tawar berhasil dimasukkan ke keranjang.');
-}
-
-
+    /**
+     * Menghapus item dari keranjang.
+     */
     public function remove($id)
     {
         $cart = session()->get('cart', []);
 
         if(isset($cart[$id])) {
             unset($cart[$id]);
-
             session()->put('cart', $cart);
         }
 

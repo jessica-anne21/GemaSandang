@@ -102,7 +102,7 @@
 
                     <div class="mb-3">
                         <label class="form-label text-muted small text-uppercase fw-bold">Catatan (Opsional)</label>
-                        <textarea name="catatan" class="form-control" rows="2" placeholder="Contoh: Tolong packing yang aman ya">{{ old('catatan') }}</textarea>
+                        <textarea name="catatan_customer" class="form-control" rows="2" placeholder="Contoh: Tolong packing yang aman ya">{{ old('catatan_customer') }}</textarea>
                     </div>
                 </div>
             </div>
@@ -126,13 +126,7 @@
                             
                             <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
                                 <div class="d-flex align-items-center">
-                                    <div class="position-relative">
-                                        <img src="{{ asset('storage/' . $details['photo']) }}" class="rounded" width="60" height="60" style="object-fit: cover;">
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">
-                                            {{ $details['quantity'] }}
-                                        </span>
-                                    </div>
-                                    <div class="ms-3">
+                                    <img src="{{ asset('storage/' . $details['photo']) }}" class="rounded border" width="60" height="60" style="object-fit: cover;">                                    <div class="ms-3">
                                         <h6 class="mb-0 text-truncate" style="max-width: 150px;">{{ $details['name'] }}</h6>
                                         <small class="text-muted">@ Rp {{ number_format($details['price'], 0, ',', '.') }}</small>
                                     </div>

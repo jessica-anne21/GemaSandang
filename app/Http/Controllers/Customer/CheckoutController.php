@@ -23,12 +23,14 @@ class CheckoutController extends Controller
 
     public function store(Request $request)
     {        
+        // 1. Validasi Input
         $request->validate([
             'alamat_pengiriman' => 'required|string|max:500',
             'kurir' => 'required|string',
             'ongkir' => 'required|numeric',
             'nomor_hp' => 'required|string|max:15',
-            'catatan' => 'nullable|string|max:1000',
+            // Sesuaikan nama field dengan di View blade (catatan_customer)
+            'catatan_customer' => 'nullable|string|max:1000', 
         ]);
 
         $cart = session()->get('cart');
@@ -37,17 +39,29 @@ class CheckoutController extends Controller
             return redirect()->route('shop');
         }
 
+        // === FITUR BARU: AUTO-UPDATE PROFIL USER ===
+        // Logic: Jika input beda dengan data di profil, update profilnya.
+        // Biar next order form-nya otomatis keisi data terbaru.
+        $user = Auth::user();
+        if ($user->alamat !== $request->alamat_pengiriman || $user->nomor_hp !== $request->nomor_hp) {
+            $user->update([
+                'alamat' => $request->alamat_pengiriman,
+                'nomor_hp' => $request->nomor_hp
+            ]);
+        }
+        // ============================================
+
         DB::beginTransaction();
 
         try {
-            // 1. Hitung Total (Cukup sekali loop)
+            // 2. Hitung Total (Cukup sekali loop)
             $subtotal = 0;
             foreach ($cart as $details) {
                 $subtotal += $details['price'] * $details['quantity'];
             }
             $grandTotal = $subtotal + $request->ongkir;
 
-            // 2. Buat Order
+            // 3. Buat Order
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'total_harga' => $grandTotal,
@@ -56,31 +70,38 @@ class CheckoutController extends Controller
                 'kurir' => $request->kurir,
                 'ongkir' => $request->ongkir,
                 'nomor_hp' => $request->nomor_hp, 
-                'catatan' => $request->catatan,
+                // Pastikan nama kolom di database sesuai (catatan_customer)
+                'catatan_customer' => $request->catatan_customer, 
             ]);
 
-            // 3. Loop Barang
+            // 4. Loop Barang & Kurangi Stok
             foreach ($cart as $id => $details) {
-                // Lock produk biar aman dari rebutan stok
+                // Lock produk biar aman dari rebutan stok (Race Condition)
                 $product = Product::lockForUpdate()->find($id); 
 
+                // Cek ketersediaan stok
                 if (!$product || $product->stok < $details['quantity']) {
                     DB::rollBack();
                     return redirect()->route('cart.index')
-                        ->with('error', 'Maaf, produk "' . $details['name'] . '" baru saja habis terjual.');
+                        ->with('error', 'Maaf, produk "' . $details['name'] . '" baru saja habis terjual atau stok tidak cukup.');
                 }
 
+                // Simpan ke OrderItem
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $id,
                     'kuantitas' => $details['quantity'],
-                    'harga_saat_beli' => $details['price'],
+                    // Best Practice: Simpan harga saat ini, bukan ambil dari master produk
+                    'harga_saat_beli' => $details['price'], 
                 ]);
 
+                // Kurangi Stok
                 $product->decrement('stok', $details['quantity']);
             }
 
             DB::commit();
+            
+            // Hapus Keranjang setelah sukses
             session()->forget('cart');
 
             return redirect()->route('checkout.success', $order->id);

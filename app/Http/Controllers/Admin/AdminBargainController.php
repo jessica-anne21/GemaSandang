@@ -45,5 +45,22 @@ public function update(Request $request, $id)
     );
 }
 
+public function reject(Request $request, $id)
+{
+    $bargain = Bargain::findOrFail($id);
+    
+    // Validasi input catatan (opsional, tapi disarankan required biar admin ga males ngisi)
+    $request->validate([
+        'catatan_admin' => 'required|string|max:255'
+    ]);
+
+    $bargain->update([
+        'status' => 'rejected',
+        'catatan_admin' => $request->catatan_admin // Simpan catatannya
+    ]);
+
+    return redirect()->back()->with('success', 'Tawaran ditolak dan catatan telah dikirim ke customer.');
+}
+
 
 }

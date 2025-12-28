@@ -20,7 +20,8 @@ class Order extends Model
         'bukti_bayar',
         'tanggal_diterima',
         'nomor_hp',
-        'catatan',
+        'catatan_customer',
+        'catatan_admin'
     ];
 
     public function user()

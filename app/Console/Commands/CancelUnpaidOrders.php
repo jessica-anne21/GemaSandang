@@ -50,15 +50,15 @@ class CancelUnpaidOrders extends Command
                     }
                 }
 
-                // 2. Update status jadi dibatalkan
+                // 2. UPDATE STATUS ORDER & CATATAN ADMIN
                 $order->update([
-                    'status' => 'dibatalkan'
-                    // Jika kamu punya kolom catatan, bisa ditambah di sini:
-                    // 'catatan_admin' => 'Dibatalkan otomatis oleh sistem (Batas waktu habis)'
+                    'status' => 'dibatalkan',
+                    'catatan_admin' => 'Dibatalkan otomatis oleh sistem (Melewati batas waktu pembayaran).' 
                 ]);
+
             });
             
-            $this->info("Order ID #{$order->id} berhasil dibatalkan otomatis.");
+            $this->info("Order ID #{$order->id} berhasil dibatalkan, stok dikembalikan & catatan disimpan.");
         }
 
         $this->info("Proses selesai.");

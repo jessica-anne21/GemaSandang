@@ -5,18 +5,17 @@
     
     {{-- Hitung sisa waktu di Server (PHP) agar akurat --}}
     @php
-        // Waktu kadaluwarsa (1 menit dari waktu pesanan dibuat)
-        // Ganti '1' dengan '24 * 60' jika nanti sudah production (24 jam)
+        // SETTING WAKTU: Sesuaikan dengan controller kamu (misal 1 menit atau 24 jam)
+        // Kalau production nanti ubah jadi: $limitInMinutes = 24 * 60;
         $limitInMinutes = 1; 
         $expiryTime = $order->created_at->addMinutes($limitInMinutes);
-        // Hitung sisa detik (bisa negatif jika sudah lewat)
         $remainingSeconds = now()->diffInSeconds($expiryTime, false);
     @endphp
 
-    {{-- KONDISI 1: Menunggu Pembayaran & Waktu Masih Ada --}}
+    {{-- KONDISI 1: Menunggu Pembayaran (Belum Upload atau Ditolak) --}}
     @if($order->status == 'menunggu_pembayaran' && !$order->bukti_bayar)
         
-        {{-- Jika waktu di server sudah habis (sebelum halaman dimuat) --}}
+        {{-- A. JIKA WAKTU SUDAH HABIS (Expired di Server) --}}
         @if($remainingSeconds <= 0)
             <div class="row justify-content-center">
                 <div class="col-lg-6 text-center">
@@ -33,8 +32,10 @@
                     </div>
                 </div>
             </div>
+
+        {{-- B. JIKA WAKTU MASIH ADA --}}
         @else
-            {{-- TAMPILAN COUNTDOWN (Jika waktu masih ada) --}}
+            {{-- TAMPILAN COUNTDOWN --}}
             <div class="row justify-content-center mb-4">
                 <div class="col-12 text-center">
                     <i class="bi bi-hourglass-split text-warning" style="font-size: 3rem;"></i>
@@ -42,9 +43,7 @@
                     
                     <div class="mt-3 mb-2">
                         <p class="text-muted mb-1">Batas waktu pembayaran:</p>
-                        {{-- Badge Timer --}}
                         <div id="countdown-display" class="badge bg-danger fs-5 px-4 py-2 rounded-pill shadow-sm">
-                            {{-- Tampilkan format awal dari PHP agar tidak kosong saat JS loading --}}
                             {{ sprintf('%02d:%02d', floor($remainingSeconds / 60), $remainingSeconds % 60) }}
                         </div>
                     </div>
@@ -52,6 +51,23 @@
                     <p class="text-muted small">Pesanan #{{ $order->id }} akan otomatis dibatalkan jika waktu habis.</p>
                 </div>
             </div>
+
+            {{-- === [FITUR BARU] ALERT JIKA PEMBAYARAN DITOLAK === --}}
+            @if($order->catatan_admin)
+                <div class="row justify-content-center mb-4">
+                    <div class="col-lg-10">
+                        <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill fs-1 me-3"></i>
+                            <div>
+                                <h5 class="alert-heading fw-bold mb-1">Pembayaran Ditolak!</h5>
+                                <p class="mb-0">Alasan: <strong>{{ $order->catatan_admin }}</strong></p>
+                                <small>Silakan perbaiki dan upload ulang bukti pembayaran di bawah ini.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+            {{-- ================================================== --}}
 
             <div class="row justify-content-center">
                 <div class="col-lg-10">
@@ -86,16 +102,19 @@
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-body p-4">
                                     <h5 class="mb-4" style="color: var(--primary-color);">2. Kirim Bukti</h5>
+                                    
                                     <form action="{{ route('checkout.payment.upload', $order->id) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="mb-4 text-center p-4 border border-dashed rounded bg-light">
                                             <i class="bi bi-cloud-upload display-4 text-muted mb-2"></i>
                                             <input type="file" name="bukti_bayar" class="form-control" required>
+                                            <div class="form-text text-muted mt-2">Format: JPG, PNG, JPEG. Max: 2MB</div>
                                         </div>
                                         <button type="submit" class="btn btn-custom w-100 py-2">
                                             <i class="bi bi-send-fill me-2"></i> Kirim Bukti
                                         </button>
                                     </form>
+
                                 </div>
                             </div>
                         </div>
@@ -137,43 +156,38 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Ambil elemen timer
+        // Ambil elemen
         const timerElement = document.getElementById('countdown-display');
         
-        // Hanya jalankan jika elemen ada dan statusnya menunggu pembayaran
+        // Pastikan elemen ada (hanya jalan di kondisi Waiting Payment)
         if (timerElement) {
-            // Ambil sisa detik dari PHP (pastikan ini angka integer)
-            let timeLeft = parseInt("{{ $remainingSeconds }}");
+            // Ambil sisa detik awal dari PHP
+            const initialSeconds = parseInt("{{ $remainingSeconds ?? 0 }}");
+            
+            // Tentukan WAKTU DEADLINE PASTI
+            const deadline = new Date().getTime() + (initialSeconds * 1000);
 
-            // Fungsi untuk update tampilan
-            function updateDisplay(seconds) {
-                const m = Math.floor(seconds / 60);
-                const s = seconds % 60;
-                // Format "00:00"
-                timerElement.textContent = 
-                    (m < 10 ? "0" : "") + m + ":" + 
-                    (s < 10 ? "0" : "") + s;
-            }
-
-            // Jalankan interval setiap 1 detik
             const countdownInterval = setInterval(() => {
-                // Kurangi 1 detik
-                timeLeft--;
+                const now = new Date().getTime();
+                const distance = deadline - now;
 
-                // Update tampilan
-                updateDisplay(timeLeft);
+                if (distance > 0) {
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                // Cek jika waktu habis
-                if (timeLeft <= 0) {
+                    timerElement.textContent = 
+                        minutes.toString().padStart(2, '0') + ":" + 
+                        seconds.toString().padStart(2, '0');
+                } else {
                     clearInterval(countdownInterval);
-                    timerElement.innerHTML = "WAKTU HABIS";
+                    timerElement.innerHTML = "EXPIRED";
                     timerElement.classList.remove('bg-danger');
                     timerElement.classList.add('bg-secondary');
                     
-                    // Reload halaman agar status terupdate (jika backend membatalkan)
+                    // Reload halaman biar masuk ke Kondisi 1A (Tampilan Waktu Habis)
                     setTimeout(() => {
-                        location.reload();
-                    }, 2000);
+                        window.location.reload();
+                    }, 1000);
                 }
             }, 1000);
         }

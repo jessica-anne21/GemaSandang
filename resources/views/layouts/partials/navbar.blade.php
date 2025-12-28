@@ -34,34 +34,50 @@
 
       <div class="d-flex align-items-center">
         <a href="{{ route('cart.index') }}" class="nav-link me-3"><i class="bi bi-cart me-1"></i> Keranjang</a>
+        
         @auth
-            <div class="nav-item dropdown">
+            <div class="nav-item dropdown position-relative">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
+                
+                {{-- 1. BADGE MERAH DI UTAMA (Dot Merah) --}}
+                @if(isset($badgeOrders) && isset($badgeBargains) && ($badgeOrders + $badgeBargains > 0))
+                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="margin-left: -10px; margin-top: 10px;">
+                        <span class="visually-hidden">New alerts</span>
+                    </span>
+                @endif
               </a>
+              
               <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="navbarDropdown">
 
-    <li>
-        <a class="dropdown-item d-flex justify-content-between align-items-center"
-           href="{{ route('customer.bargains.index') }}">
-            Riwayat Tawaran
+                <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center"
+                       href="{{ route('customer.bargains.index') }}">
+                        Riwayat Tawaran
 
-            {{-- badge realtime (optional) --}}
-            @if(isset($pendingBargainsCount) && $pendingBargainsCount > 0)
-                <span class="badge bg-warning text-dark rounded-pill">
-                    {{ $pendingBargainsCount }}
-                </span>
-            @endif
-        </a>
-    </li>
+                        {{-- 2. BADGE ANGKA RIWAYAT TAWARAN --}}
+                        @if(isset($badgeBargains) && $badgeBargains > 0)
+                            <span class="badge bg-danger rounded-pill ms-2">
+                                {{ $badgeBargains }}
+                            </span>
+                        @endif
+                    </a>
+                </li>
 
-    <li>
-        <a class="dropdown-item" href="{{ route('orders.index') }}">
-            Riwayat Pesanan
-        </a>
-    </li>
+                <li>
+                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('orders.index') }}">
+                        Riwayat Pesanan
+                        
+                        {{-- 3. BADGE ANGKA RIWAYAT PESANAN --}}
+                        @if(isset($badgeOrders) && $badgeOrders > 0)
+                            <span class="badge bg-danger rounded-pill ms-2">
+                                {{ $badgeOrders }}
+                            </span>
+                        @endif
+                    </a>
+                </li>
 
-    <li><hr class="dropdown-divider"></li>
+                <li><hr class="dropdown-divider"></li>
 
                 <li>
                     <form method="POST" action="{{ route('logout') }}">

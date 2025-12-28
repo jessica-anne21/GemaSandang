@@ -9,31 +9,15 @@ use App\Models\Category;
 
 class ShopController extends Controller
 {
-    /**
-     * Menampilkan halaman shop dengan semua produk.
-     *
-     * @return \Illuminate\View\View
-     */
     public function index()
     {
-        $products = Product::with('category')->latest()->get();
+        // LOGIC SHOPEE STYLE: Stok > 0 di atas, Stok = 0 di bawah
+        $products = Product::with('category')
+            ->orderByRaw('stok = 0, created_at DESC')
+            ->get();
+
         $query = null; 
         return view('customer.shop', compact('products', 'query'));
-    }
-
-    public function showByCategory(Category $category)
-    {
-
-        // Ambil semua produk yang memiliki category_id yang sama
-        $products = $category->products()->latest()->get();
-
-        // Kirim data ke view baru
-        return view('customer.shop-by-category', compact('products', 'category'));
-    }
-
-    public function show(Product $product)
-    {
-        return view('customer.product-detail', compact('product'));
     }
 
     public function search(Request $request)
@@ -42,9 +26,23 @@ class ShopController extends Controller
 
         $products = Product::with('category')
             ->where('nama_produk', 'LIKE', "%{$query}%")
-            ->latest()
+            ->orderByRaw('stok = 0, created_at DESC') // Tetap urutkan stok di hasil cari
             ->get();
 
         return view('customer.shop', compact('products', 'query'));
+    }
+
+    public function showByCategory(Category $category)
+    {
+        $products = $category->products()
+            ->orderByRaw('stok = 0, created_at DESC')
+            ->get();
+
+        return view('customer.shop-by-category', compact('products', 'category'));
+    }
+
+    public function show(Product $product)
+    {
+        return view('customer.product-detail', compact('product'));
     }
 }
