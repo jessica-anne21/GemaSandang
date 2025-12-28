@@ -105,18 +105,22 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($recentBargains as $bargain)
-                        <tr>
-                            <td class="ps-3">
-                                <strong>{{ $bargain->product->nama_produk }}</strong><br>
-                                <small class="text-muted">{{ $bargain->user->name }}</small>
-                            </td>
-                            <td class="text-danger fw-bold">Rp {{ number_format($bargain->harga_tawaran, 0, ',', '.') }}</td>
-                            <td class="text-center">
-                                <a href="{{ route('admin.bargains.index') }}" class="btn btn-sm btn-dark rounded-pill">Cek</a>
-                            </td>
-                        </tr>
-                        @endforeach
+                        @forelse($recentBargains as $bargain)
+                            <tr>
+                                <td>{{ $bargain->product->nama_produk }}</td>
+                                <td>{{ $bargain->user->name }}</td>
+                                <td class="text-danger fw-bold">Rp {{ number_format($bargain->harga_tawaran, 0, ',', '.') }}</td>
+                                <td class="text-center">
+                                    <a href="{{ route('admin.bargains.index') }}" class="btn btn-sm btn-dark rounded-pill">Cek</a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">
+                                    <i class="bi bi-info-circle me-1"></i> Belum ada tawaran baru yang masuk.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

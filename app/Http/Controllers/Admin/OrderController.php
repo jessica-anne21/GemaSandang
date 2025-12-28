@@ -42,24 +42,19 @@ class OrderController extends Controller
     {
         $order = Order::findOrFail($id);
 
-        // Validasi input
         $request->validate([
-            'status' => 'required|in:menunggu_pembayaran,menunggu_konfirmasi,dikirim,selesai,dibatalkan',
+            'status' => 'required|in:menunggu_pembayaran,menunggu_konfirmasi,diproses,dikirim,selesai,dibatalkan',
             'nomor_resi' => 'nullable|string|max:255',
         ]);
 
-        // Update status
         $order->status = $request->status;
 
-        // Update nomor resi jika ada input 
-        if ($request->filled('nomor_resi')) {
-            $order->nomor_resi = $request->nomor_resi;
-        }
+        $order->nomor_resi = $request->nomor_resi;
 
         $order->save();
 
         return redirect()->route('admin.orders.show', $order->id)
-                         ->with('success', 'Status pesanan berhasil diperbarui.');
+                        ->with('success', 'Status pesanan berhasil diperbarui.');
     }
 
     public function rejectPayment(Request $request, Order $order)
@@ -68,7 +63,7 @@ class OrderController extends Controller
             'catatan_admin' => 'required|string|max:255'
         ]);
 
-        // Hapus bukti bayar lama dari storage untuk hemat memori)
+        // Hapus bukti bayar lama dari storage untuk hemat memori
         if ($order->bukti_bayar) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($order->bukti_bayar);
         }
