@@ -143,12 +143,12 @@
                                         @csrf
                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                         <button type="submit" class="btn btn-custom btn-sm">
-                                            <i class="bi bi-cart-plus"></i> Add to Cart
+                                            <i class="bi bi-cart-plus"></i> Tambah ke Keranjang
                                         </button>
                                     </form>
                                 @elseguest
                                     <a href="{{ route('login') }}" class="btn btn-custom btn-sm">
-                                        <i class="bi bi-box-arrow-in-right"></i> Login to Buy
+                                        <i class="bi bi-box-arrow-in-right"></i> Login untuk Beli
                                     </a>
                                 @endguest
                             @else

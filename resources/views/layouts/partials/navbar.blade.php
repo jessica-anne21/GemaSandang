@@ -33,8 +33,17 @@
       </ul>
 
       <div class="d-flex align-items-center">
-        <a href="{{ route('cart.index') }}" class="nav-link me-3"><i class="bi bi-cart me-1"></i> Keranjang</a>
-        
+        <a href="{{ route('cart.index') }}" class="nav-link position-relative">
+            <i class="bi bi-cart fs-4"></i>
+            {{-- Badge Angka Keranjang --}}
+            @if(count(session('cart', [])) > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
+                    {{ count(session('cart')) }}
+                    <span class="visually-hidden">produk di keranjang</span>
+                </span>
+            @endif
+        </a> 
+               
         @auth
             <div class="nav-item dropdown position-relative">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">

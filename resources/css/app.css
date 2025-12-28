@@ -162,15 +162,13 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* Efek untuk Produk Sold Out */
 .product-sold-out {
-    opacity: 0.6; /* Membuat agak transparan */
-    pointer-events: none; /* Mencegah diklik (opsional, kalau mau total disable) */
-    filter: grayscale(100%); /* Membuat jadi hitam putih */
+    opacity: 0.6; 
+    pointer-events: none; 
+    filter: grayscale(100%); 
     position: relative;
 }
 
-/* Label Sold Out di tengah gambar */
 .sold-out-badge {
     position: absolute;
     top: 50%;

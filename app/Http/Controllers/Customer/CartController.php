@@ -10,46 +10,34 @@ use App\Models\Bargain;
 class CartController extends Controller
 {
     /**
-     * Menampilkan halaman keranjang belanja dengan "Satpam" Cerdas.
+     * Menampilkan halaman keranjang belanja.
      */
     public function index()
     {
         $cart = session()->get('cart', []);
-        $changes = false; 
-        $removedItems = []; 
+        $removedItems = [];
 
-        foreach ($cart as $key => $details) {
+        foreach ($cart as $id => $details) {
+            $product = Product::find($id);
             
-            // 1. Cek apakah item hasil tawar-menawar
-            if (isset($details['bargain_id'])) {
-                // Cari data tawaran terbaru di Database
-                $bargain = \App\Models\Bargain::find($details['bargain_id']);
-                
-                if (!$bargain || $bargain->status !== 'accepted') {
-                    unset($cart[$key]); 
-                    $changes = true;
-                    $removedItems[] = $details['name'];
-                }
-            }
-            
-            // 2. Cek Stok 
-            $productDB = \App\Models\Product::find($key);
-            if (!$productDB || $productDB->stok < 1) {
-                 unset($cart[$key]);
-                 $changes = true;
-                 $removedItems[] = $details['name'] . ' (Stok Habis)';
+            if (!$product || $product->stok < 1) {
+                $removedItems[] = $details['name']; 
+                unset($cart[$id]); 
             }
         }
 
-        // Jika ada yang dihapus, update session & kasih notif
-        if ($changes) {
+        if (!empty($removedItems)) {
             session()->put('cart', $cart);
-            session()->flash('warning', 'Beberapa item dihapus dari keranjang karena penawaran dibatalkan atau stok habis: ' . implode(', ', $removedItems));
+            $namaProduk = implode(', ', $removedItems);
+            
+            session()->flash('warning', "Maaf, produk ($namaProduk) baru saja di-checkout pelanggan lain. Stok thrift kami terbatas 1 pcs per item.");
+            
+            return redirect()->route('cart.index'); 
         }
 
-        return view('customer.cart', compact('cart'));
+        return view('customer.cart', compact('cart')); 
     }
-
+    
     /**
      * Menyimpan produk baru ke dalam keranjang (Normal Price).
      */

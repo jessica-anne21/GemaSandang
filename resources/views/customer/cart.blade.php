@@ -5,79 +5,97 @@
     <h1 class="display-5 mb-4" style="font-family: 'Playfair Display', serif;">Keranjang Belanja Anda</h1>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 12px;">
+            <i class="bi bi-check-circle-fill me-2"></i>
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    @if(!empty($cart))
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">Produk</th>
-                    <th scope="col">Harga</th>
-                    <th scope="col">Kuantitas</th>
-                    <th scope="col" class="text-end">Subtotal</th>
-                    <th scope="col">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @php $total = 0; @endphp
-                @foreach($cart as $id => $details)
-                    @php $total += $details['price'] * $details['quantity']; @endphp
-                    <tr>
-                        <td data-th="Product">
-                            <div class="row">
-                                <div class="col-sm-3 hidden-xs">
-                                    <img src="{{ asset('storage/' . $details['photo']) }}" width="100" class="img-responsive"/>
-                                </div>
-                                <div class="col-sm-9">
-                                <h4 class="nomargin">
-                                    {{ $details['name'] }}
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 12px; background-color: #fff3cd; color: #856404;">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                <div>
+                    <strong>Waduh, Maaf Banget!</strong><br>
+                    {{ session('warning') }}
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
-                                    @if(!empty($details['from_bargain']))
-                                        <span class="badge bg-success ms-2">Harga Negosiasi</span>
-                                    @endif
-                                </h4>
+    @if(!empty($cart))
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">Produk</th>
+                        <th scope="col">Harga</th>
+                        <th scope="col">Kuantitas</th>
+                        <th scope="col" class="text-end">Subtotal</th>
+                        <th scope="col" class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php $total = 0; @endphp
+                    @foreach($cart as $id => $details)
+                        @php $total += $details['price'] * $details['quantity']; @endphp
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ asset('storage/' . $details['photo']) }}" width="80" class="rounded shadow-sm me-3" alt="{{ $details['name'] }}">
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ $details['name'] }}</h6>
+                                        @if(!empty($details['is_bargain']))
+                                            <span class="badge bg-success small">Harga Negosiasi</span>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        <td data-th="Price">Rp {{ number_format($details['price'], 0, ',', '.') }}</td>
-                        <td data-th="Quantity">
-                            <input type="number" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center" readonly />
-                        </td>
-                        <td data-th="Subtotal" class="text-end">
-                            Rp {{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }}
-                        </td>
-                        <td class="actions">
-                            <form action="{{ route('cart.remove', $id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus produk ini dari keranjang?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i></button>
-                            </form>
+                            </td>
+                            <td>Rp {{ number_format($details['price'], 0, ',', '.') }}</td>
+                            <td>
+                                <input type="number" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center" readonly style="width: 50px;">
+                            </td>
+                            <td class="text-end fw-bold">
+                                Rp {{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }}
+                            </td>
+                            <td class="text-center">
+                                <form action="{{ route('cart.remove', $id) }}" method="POST" onsubmit="return confirm('Hapus produk ini dari keranjang?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger border-0">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" class="text-end py-4">
+                            <h4 class="mb-0">Total: <span class="text-danger">Rp {{ number_format($total, 0, ',', '.') }}</span></h4>
                         </td>
                     </tr>
-                @endforeach
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="5" class="text-end"><h3><strong>Total Rp {{ number_format($total, 0, ',', '.') }}</strong></h3></td>
-                </tr>
-                <tr>
-                    <td colspan="5" class="text-end">
-                        <a href="{{ route('shop') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Lanjutkan Belanja</a>
-                        <a href="{{ route('checkout.index') }}" class="btn btn-custom">
-                            Checkout <i class="bi bi-arrow-right"></i>
-                        </a>                   
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
+                    <tr>
+                        <td colspan="5" class="text-end border-0">
+                            <a href="{{ route('shop') }}" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-arrow-left"></i> Kembali
+                            </a>
+                            <a href="{{ route('checkout.index') }}" class="btn btn-dark px-4">
+                                Checkout <i class="bi bi-arrow-right"></i>
+                            </a>                   
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
     @else
-        <div class="alert alert-info text-center">
-            <p>Keranjang belanja Anda masih kosong.</p>
-            <a href="{{ route('shop') }}" class="btn btn-primary">Mulai Belanja</a>
+        <div class="alert alert-light text-center py-5 border shadow-sm" style="border-radius: 15px;">
+            <i class="bi bi-cart-x text-muted" style="font-size: 3rem;"></i>
+            <p class="mt-3 text-muted">Keranjang Anda masih kosong.</p>
+            <a href="{{ route('shop') }}" class="btn btn-dark px-4">Lihat Koleksi Produk</a>
         </div>
     @endif 
 </div>
