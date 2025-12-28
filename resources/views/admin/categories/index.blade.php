@@ -3,7 +3,7 @@
 @section('content')
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0" style="font-family: 'Playfair Display', serif;">Kelola Kategori Produk</h1>
+        <h1 class="h3 mb-0" style="font-family: 'Playfair Display', serif; color: #800000;">Kelola Kategori Produk</h1>
         <a href="{{ route('admin.categories.create') }}" class="btn btn-custom">
             <i class="bi bi-plus-circle me-1"></i> Tambah Kategori
         </a>

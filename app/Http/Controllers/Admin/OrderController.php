@@ -15,15 +15,12 @@ class OrderController extends Controller
     {
         $query = Order::with('user')->latest();
 
-        // Logika FILTER TANGGAL dari Dashboard Chart
         if ($request->has('date')) {
             $date = $request->date;
-            // Filter pesanan yang dibuat (created_at) pada tanggal spesifik (YYYY-MM-DD)
             $query->whereDate('created_at', $date);
         
         }
 
-        // Ambil semua pesanan, urutkan dari yang terbaru dan terapkan paginasi
         $orders = $query->paginate(10); 
 
         return view('admin.orders.index', compact('orders'));
@@ -34,9 +31,7 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        // Ambil pesanan berdasarkan ID beserta relasi user dan items (produk)
         $order = Order::with(['user', 'items.product'])->findOrFail($id);
-
         return view('admin.orders.show', compact('order'));
     }
 
@@ -49,7 +44,6 @@ class OrderController extends Controller
 
         // Validasi input
         $request->validate([
-            // Memperbaiki status sesuai yang digunakan di aplikasi
             'status' => 'required|in:menunggu_pembayaran,menunggu_konfirmasi,dikirim,selesai,dibatalkan',
             'nomor_resi' => 'nullable|string|max:255',
         ]);
@@ -57,7 +51,7 @@ class OrderController extends Controller
         // Update status
         $order->status = $request->status;
 
-        // Update nomor resi jika ada input (terutama jika status 'dikirim')
+        // Update nomor resi jika ada input 
         if ($request->filled('nomor_resi')) {
             $order->nomor_resi = $request->nomor_resi;
         }
@@ -69,23 +63,23 @@ class OrderController extends Controller
     }
 
     public function rejectPayment(Request $request, Order $order)
-{
-    $request->validate([
-        'catatan_admin' => 'required|string|max:255'
-    ]);
+    {
+        $request->validate([
+            'catatan_admin' => 'required|string|max:255'
+        ]);
 
-    // Hapus bukti bayar lama dari storage (Opsional, biar hemat memori)
-    if ($order->bukti_bayar) {
-        \Illuminate\Support\Facades\Storage::disk('public')->delete($order->bukti_bayar);
+        // Hapus bukti bayar lama dari storage untuk hemat memori)
+        if ($order->bukti_bayar) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($order->bukti_bayar);
+        }
+
+        $order->update([
+            'status' => 'menunggu_pembayaran', 
+            'bukti_bayar' => null, 
+            'catatan_admin' => $request->catatan_admin 
+        ]);
+
+        return redirect()->back()->with('success', 'Pembayaran ditolak. Notifikasi dikirim ke customer.');
     }
-
-    $order->update([
-        'status' => 'menunggu_pembayaran', // PENTING: Balikin status biar form upload muncul lagi
-        'bukti_bayar' => null, // Kosongin biar kedetect belum bayar
-        'catatan_admin' => $request->catatan_admin // Simpan alasan penolakan
-    ]);
-
-    return redirect()->back()->with('success', 'Pembayaran ditolak. Notifikasi dikirim ke customer.');
-}
     
 }

@@ -17,10 +17,6 @@
     </div>
 
     <div class="row g-4">
-        
-        {{-- =================================== --}}
-        {{-- KOLOM KIRI: PROFIL & STATISTIK --}}
-        {{-- =================================== --}}
         <div class="col-lg-4">
             
             {{-- Card Profil --}}
@@ -66,18 +62,14 @@
                         <i class="bi bi-wallet2 fs-4 opacity-50"></i>
                     </div>
                     <h2 class="fw-bold mb-0">Rp {{ number_format($totalSpent, 0, ',', '.') }}</h2>
-                    <div class="mt-3 opacity-75 small border-top border-white pt-3 d-flex justify-content-between">
-                        <span>Total Pesanan Selesai:</span>
-                        <span class="fw-bold">{{ $totalOrders }}</span>
+                    <div class="stat-box">
+                        <p>Total Pesanan Selesai: <strong>{{ $totalPesananSelesai }}</strong></p>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        {{-- =================================== --}}
-        {{-- KOLOM KANAN: RIWAYAT PESANAN --}}
-        {{-- =================================== --}}
         <div class="col-lg-8">
             <div class="card shadow-sm border-0 h-100" style="border-radius: 0.75rem;">
                 <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">

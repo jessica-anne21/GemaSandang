@@ -10,7 +10,6 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
     }
     
-    /* Sold Out Styles */
     .product-sold-out {
         opacity: 0.7;
         filter: grayscale(100%);
@@ -31,7 +30,6 @@
         pointer-events: none;
     }
 
-    /* Style untuk Garis Pemisah ala Shopee */
     .sold-out-divider {
         display: flex;
         align-items: center;
@@ -58,14 +56,12 @@
 
 <div class="container my-5">
     
-    {{-- Search Bar --}}
     <div class="row justify-content-center mb-5">
         <div class="col-md-6">
              @include('layouts.partials.search-bar')
         </div>
     </div>
 
-    {{-- Title Section --}}
     <div class="row text-center mb-5">
         <div class="col">
             @if(isset($query) && $query != null)
@@ -86,7 +82,6 @@
         </div>
     </div>
 
-    {{-- Alerts --}}
     <div class="row justify-content-center">
         <div class="col-md-8">
             @foreach (['success', 'warning', 'error'] as $msg)
@@ -100,12 +95,9 @@
         </div>
     </div>
 
-    {{-- Product Grid --}}
     <div class="row">
         @forelse ($products as $index => $product)
             
-            {{-- === LOGIK GARIS PEMISAH SHOPEE STYLE === --}}
-            {{-- Muncul jika produk saat ini stoknya 0 DAN (ini produk pertama ATAU produk sebelumnya stoknya > 0) --}}
             @if($product->stok == 0 && ($loop->first || $products[$index - 1]->stok > 0))
                 <div class="col-12">
                     <div class="sold-out-divider">
@@ -129,11 +121,11 @@
                         @endif
                     </div>
 
-                    <div class="card-body d-flex flex-column p-3 text-center">
+                    <div class="card-body d-flex flex-column p-3">
                         <div class="small text-muted mb-1">{{ $product->category->nama_kategori }}</div>
                         
                         <a href="{{ route('product.show', $product) }}" class="text-decoration-none text-dark">
-                            <h5 class="card-title text-truncate" style="font-family: 'Playfair Display', serif;">{{ $product->nama_produk }}</h5>
+                            <h5 class="card-title" style="font-family: 'Playfair Display', serif;">{{ $product->nama_produk }}</h5>
                         </a>
                         
                         <div class="mt-auto pt-2">

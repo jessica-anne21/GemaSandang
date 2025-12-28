@@ -103,12 +103,16 @@ class ProductController extends Controller
     /**
      * Menghapus produk dari database.
      */
-    public function destroy(Product $product)
+    public function destroy($id)
     {
-        Storage::disk('public')->delete($product->foto_produk);
-        
-        $product->delete();
+        $product = Product::withCount('orderItems')->findOrFail($id);
 
-        return redirect()->route('admin.products.index')->with('success', 'Produk berhasil dihapus.');
+        // Cek apakah produk ini sudah pernah dibeli (ada di tabel order_items)
+        if ($product->order_items_count > 0) {
+            return redirect()->back()->with('error', 'Produk tidak bisa dihapus karena sudah tersambung dengan riwayat pesanan pelanggan!');
+        }
+
+        $product->delete();
+        return redirect()->back()->with('success', 'Produk berhasil dihapus.');
     }
 }

@@ -15,30 +15,24 @@ class CartController extends Controller
     public function index()
     {
         $cart = session()->get('cart', []);
-        $changes = false; // Penanda ada perubahan atau ngga
-        $removedItems = []; // Daftar barang yang dihapus
+        $changes = false; 
+        $removedItems = []; 
 
-        // === LOGIKA "SATPAM KERANJANG" ===
-        // Kita loop manual agar bisa unset (hapus) item
         foreach ($cart as $key => $details) {
             
-            // 1. Cek apakah item ini hasil tawar-menawar?
+            // 1. Cek apakah item hasil tawar-menawar
             if (isset($details['bargain_id'])) {
                 // Cari data tawaran terbaru di Database
                 $bargain = \App\Models\Bargain::find($details['bargain_id']);
                 
-                // HAPUS JIKA:
-                // A. Data tawarannya udah dihapus admin dari DB (null)
-                // B. Statusnya berubah jadi 'rejected' (Dibatalkan Admin)
-                // C. Statusnya masih 'pending' (Aneh, tapi jaga-jaga)
                 if (!$bargain || $bargain->status !== 'accepted') {
-                    unset($cart[$key]); // Tendang dari keranjang
+                    unset($cart[$key]); 
                     $changes = true;
                     $removedItems[] = $details['name'];
                 }
             }
             
-            // 2. Cek Stok (Jaga-jaga kalau stok real-time habis dibeli orang lain)
+            // 2. Cek Stok 
             $productDB = \App\Models\Product::find($key);
             if (!$productDB || $productDB->stok < 1) {
                  unset($cart[$key]);
@@ -87,7 +81,6 @@ class CartController extends Controller
                 "quantity" => 1,
                 "price" => $product->harga,
                 "photo" => $product->foto_produk,
-                // Tidak ada bargain_id karena ini harga normal
             ];
         }
 
@@ -96,7 +89,7 @@ class CartController extends Controller
     }
 
     /**
-     * Menyimpan produk HASIL NEGO ke keranjang (Bargain Price).
+     * Menyimpan produk hasil nego ke keranjang.
      */
     public function addFromBargain(Request $request)
     {
@@ -115,10 +108,10 @@ class CartController extends Controller
         $cart[$cartKey] = [
             'name' => $bargain->product->nama_produk,
             'quantity' => 1,
-            'price' => $bargain->harga_tawaran, // 🔥 Pakai Harga Deal
+            'price' => $bargain->harga_tawaran, 
             'photo' => $bargain->product->foto_produk,
             'is_bargain' => true, 
-            'bargain_id' => $bargain->id, // <--- [PENTING] INI KUNCI BUAT "SATPAM" BEKERJA!
+            'bargain_id' => $bargain->id,
         ];
 
         session()->put('cart', $cart);

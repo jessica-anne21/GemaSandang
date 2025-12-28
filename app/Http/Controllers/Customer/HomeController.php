@@ -12,16 +12,16 @@ class HomeController extends Controller
      * Menampilkan halaman utama (home page).
      */
     public function index()
-{
-    // Hanya ambil 8 produk terbaru yang MASIH ADA STOKNYA
-    $products = \App\Models\Product::with('category')
-        ->where('stok', '>', 0)
-        ->latest()
-        ->take(8)
-        ->get();
+    {
+        // Hanya ambil 8 produk terbaru yang masih ada stoknya
+        $products = \App\Models\Product::with('category')
+            ->where('stok', '>', 0)
+            ->latest()
+            ->take(8)
+            ->get();
 
-    return view('customer.home', compact('products'));
-}
+        return view('customer.home', compact('products'));
+    }
 
     /**
      * Menampilkan halaman 'about'.

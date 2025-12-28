@@ -27,10 +27,8 @@
                     <tbody>
                         @foreach($bargains as $bargain)
                             <tr>
-                                {{-- KOLOM PRODUK --}}
                                 <td class="p-3 ps-4">
                                     <div class="d-flex align-items-center">
-                                        {{-- Tampilkan Foto Produk --}}
                                         @if($bargain->product && $bargain->product->foto_produk)
                                             <img src="{{ asset('storage/' . $bargain->product->foto_produk) }}" 
                                                  alt="Produk" 
@@ -53,7 +51,6 @@
                                     </div>
                                 </td>
 
-                                {{-- KOLOM HARGA --}}
                                 <td class="p-3 text-muted text-decoration-line-through">
                                     Rp {{ number_format($bargain->product->harga ?? 0, 0, ',', '.') }}
                                 </td>
@@ -61,7 +58,6 @@
                                     Rp {{ number_format($bargain->harga_tawaran, 0, ',', '.') }}
                                 </td>
 
-                                {{-- KOLOM STATUS --}}
                                 <td class="p-3 text-center">
                                     @if($bargain->status === 'pending')
                                         <span class="badge bg-warning text-dark rounded-pill px-3">Menunggu</span>
@@ -72,7 +68,6 @@
                                     @endif
                                 </td>
                                 
-                                {{-- KOLOM PESAN ADMIN --}}
                                 <td class="p-3">
                                     @if($bargain->status === 'rejected' && $bargain->catatan_admin)
                                         <div class="alert alert-danger p-2 mb-0 small border-0 bg-danger-subtle text-danger">
@@ -88,15 +83,13 @@
                                     @endif
                                 </td>
 
-                                {{-- === KOLOM TOMBOL AKSI CERDAS === --}}
                                 <td class="p-3 text-center">
-                                    {{-- KONDISI 1: DITERIMA (ACCEPTED) --}}
                                     @if($bargain->status === 'accepted')
                                         @php
                                             // 1. Cek Stok Produk
                                             $stokHabis = $bargain->product && $bargain->product->stok < 1;
                                             
-                                            // 2. Cek Keranjang (Apakah produk ini sudah ada di session cart?)
+                                            // 2. Cek Keranjang (Apakah produk ini sudah ada di session cart)
                                             $cart = session('cart', []);
                                             $isInCart = isset($bargain->product) && array_key_exists($bargain->product->id, $cart);
                                         @endphp
@@ -119,28 +112,23 @@
                                             </form>
                                         @endif
 
-                                    {{-- KONDISI 2: DITOLAK (REJECTED) --}}
                                     @elseif($bargain->status === 'rejected')
                                         
                                         @php
-                                            // === FIX: CEK STOK DULU SEBELUM TAWAR ULANG ===
                                             $stokHabis = $bargain->product && $bargain->product->stok < 1;
                                         @endphp
 
                                         @if($stokHabis)
-                                            {{-- Kalau barang udah laku/habis, jangan kasih harapan palsu --}}
                                             <button class="btn btn-sm btn-secondary w-100" disabled>
                                                 <i class="bi bi-x-circle"></i> Stok Habis
                                             </button>
                                         @elseif($bargain->product)
-                                            {{-- Kalau stok aman, baru tombol Tawar Ulang muncul --}}
                                             <a href="{{ route('product.show', $bargain->product->id) }}?last_offer={{ $bargain->harga_tawaran }}" 
                                                class="btn btn-sm btn-outline-dark w-100">
                                                 <i class="bi bi-arrow-repeat"></i> Tawar Ulang
                                             </a>
                                         @endif
 
-                                    {{-- KONDISI 3: MENUNGGU (PENDING) --}}
                                     @else
                                         <button class="btn btn-sm btn-secondary w-100" disabled>
                                             Menunggu

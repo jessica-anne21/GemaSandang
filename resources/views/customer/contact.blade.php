@@ -22,7 +22,7 @@
                     </div>
                     <h3 class="card-title fw-bold mb-3">Instagram</h3>
                     <p class="text-muted mb-4">
-                        Ikuti <strong>@gemasandang</strong> untuk update katalog terbaru, promo flash sale, dan inspirasi OOTD.
+                        Ikuti <strong>@gemasandang</strong> untuk update katalog terbaru dan inspirasi OOTD.
                     </p>
                     
                     <a href="https://www.instagram.com/gemasandang/" target="_blank" class="btn btn-outline-danger btn-lg w-100 rounded-pill">
@@ -43,9 +43,7 @@
                     <p class="text-muted mb-4">
                         Butuh respon cepat? Chat admin kami untuk konfirmasi pesanan, tanya stok, atau komplain.
                     </p>
-                    
-                    {{-- Link WA API (Langsung Chat) --}}
-                    {{-- Ganti 6281234567890 dengan nomor admin asli (Format: 62...) --}}
+
                     <a href="https://wa.me/6282121349200?text=Halo%20Admin%20Gema%20Sandang,%20saya%20tertarik%20dengan%20produk%20Anda..." target="_blank" class="btn btn-outline-success btn-lg w-100 rounded-pill">
                         <i class="bi bi-whatsapp me-2"></i> Chat Admin
                     </a>
@@ -68,7 +66,6 @@
 
 @section('styles')
 <style>
-    /* Efek hover kartu */
     .hover-lift {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }

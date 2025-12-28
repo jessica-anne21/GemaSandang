@@ -3,14 +3,12 @@
 @section('content')
 <div class="container my-5">
     
-    {{-- Judul Halaman --}}
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="display-5" style="font-family: 'Playfair Display', serif;">Checkout</h1>
         </div>
     </div>
 
-    {{-- ERROR HANDLING GLOBAL (PENTING: Biar ketahuan kalau ada error) --}}
     @if ($errors->any())
         <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
             <strong>Ups! Ada masalah dengan input Anda:</strong>
@@ -33,15 +31,10 @@
     <form action="{{ route('checkout.store') }}" method="POST">
         @csrf
         <div class="row">
-            
-            {{-- =================================== --}}
-            {{-- KOLOM KIRI: FORMULIR ALAMAT --}}
-            {{-- =================================== --}}
             <div class="col-lg-7 mb-4">
                 <div class="card border-0 shadow-sm p-4">
                     <h4 class="mb-4" style="color: var(--primary-color); font-family: 'Playfair Display', serif;">Detail Pengiriman</h4>
                     
-                    {{-- Informasi Pribadi --}}
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted small text-uppercase fw-bold">Nama Penerima</label>
@@ -49,11 +42,9 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted small text-uppercase fw-bold">Nomor WhatsApp / HP</label>
-                            {{-- Tambahkan class @error --}}
                             <input type="text" name="nomor_hp" class="form-control @error('nomor_hp') is-invalid @enderror" 
                                    value="{{ old('nomor_hp', Auth::user()->nomor_hp) }}" placeholder="Contoh: 0812..." required>
                             
-                            {{-- Pesan Error Spesifik --}}
                             @error('nomor_hp')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -107,9 +98,6 @@
                 </div>
             </div>
 
-            {{-- =================================== --}}
-            {{-- KOLOM KANAN: RINGKASAN PESANAN --}}
-            {{-- =================================== --}}
             <div class="col-lg-5">
                 <div class="card border-0 shadow-sm p-4" style="background-color: #fafafa; border-radius: 0.75rem;">
                     <h4 class="mb-4" style="color: var(--primary-color); font-family: 'Playfair Display', serif;">Ringkasan Pesanan</h4>
@@ -171,17 +159,14 @@
     </form>
 </div>
 
-{{-- Script Sederhana untuk Update Total --}}
 <script>
     document.getElementById('ongkirSelect').addEventListener('change', function() {
         let ongkir = parseInt(this.value);
-        // Jika user pilih "Pilih lokasi tujuan" (value=""), set ongkir 0
         if (isNaN(ongkir)) ongkir = 0;
 
         let subtotal = {{ $subtotal }};
         let total = subtotal + ongkir;
         
-        // Format Rupiah
         document.getElementById('ongkirDisplay').innerText = 'Rp ' + ongkir.toLocaleString('id-ID');
         document.getElementById('totalDisplay').innerText = 'Rp ' + total.toLocaleString('id-ID');
     });

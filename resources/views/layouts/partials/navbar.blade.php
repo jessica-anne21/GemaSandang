@@ -40,7 +40,6 @@
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 <i class="bi bi-person-circle me-1"></i> {{ Auth::user()->name }}
                 
-                {{-- 1. BADGE MERAH DI UTAMA (Dot Merah) --}}
                 @if(isset($badgeOrders) && isset($badgeBargains) && ($badgeOrders + $badgeBargains > 0))
                     <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="margin-left: -10px; margin-top: 10px;">
                         <span class="visually-hidden">New alerts</span>
@@ -55,7 +54,6 @@
                        href="{{ route('customer.bargains.index') }}">
                         Riwayat Tawaran
 
-                        {{-- 2. BADGE ANGKA RIWAYAT TAWARAN --}}
                         @if(isset($badgeBargains) && $badgeBargains > 0)
                             <span class="badge bg-danger rounded-pill ms-2">
                                 {{ $badgeBargains }}
@@ -68,7 +66,6 @@
                     <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('orders.index') }}">
                         Riwayat Pesanan
                         
-                        {{-- 3. BADGE ANGKA RIWAYAT PESANAN --}}
                         @if(isset($badgeOrders) && $badgeOrders > 0)
                             <span class="badge bg-danger rounded-pill ms-2">
                                 {{ $badgeOrders }}

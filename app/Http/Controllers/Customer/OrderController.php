@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Order; 
-use Carbon\Carbon; // Jangan lupa import Carbon untuk tanggal
+use Carbon\Carbon; 
 
 
 class OrderController extends Controller
@@ -19,9 +19,6 @@ class OrderController extends Controller
         return view('customer.orders.index', compact('orders'));
     }
 
-
-// ...
-
     /**
      * Menandai pesanan sebagai selesai (Diterima oleh customer).
      */
@@ -32,7 +29,7 @@ class OrderController extends Controller
                       ->where('user_id', Auth::id())
                       ->firstOrFail();
 
-        // 2. Validasi: Hanya bisa terima jika statusnya 'dikirim'
+        // 2. Validasi: Hanya bisa terima jika statusnya 'dikirim's
         if ($order->status !== 'dikirim') {
             return redirect()->back()->with('error', 'Pesanan tidak dapat diselesaikan saat ini.');
         }

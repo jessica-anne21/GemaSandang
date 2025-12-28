@@ -20,7 +20,7 @@
         </form>
     </div>
 
-    {{-- Alert Error (Jika ada) --}}
+    {{-- Alert Error --}}
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
             {{ session('error') }}

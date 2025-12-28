@@ -4,11 +4,11 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
-use Illuminate\Support\Facades\Auth; // <--- PENTING: Buat cek user login
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\Paginator;
 use App\Models\Category;
-use App\Models\Order;   // <--- PENTING: Buat hitung notif order
-use App\Models\Bargain; // <--- PENTING: Buat hitung notif tawaran
+use App\Models\Order;
+use App\Models\Bargain;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,45 +26,57 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         /**
-         * 1. Mengatur Pagination agar menggunakan Bootstrap 5.
+         * Mengatur Pagination agar menggunakan Bootstrap 5.
          */
         Paginator::useBootstrapFive();
 
         /**
-         * 2. View Composer untuk Navbar (layouts.partials.navbar).
-         * Disini kita kirim data Kategori DAN data Badge Notifikasi sekaligus.
+         * View Composer untuk Navbar Customer (layouts.partials.navbar).
          */
         View::composer('layouts.partials.navbar', function ($view) {
             
-            // A. Ambil Data Kategori (Existing)
+            // A. Ambil Data Kategori untuk Dropdown
             $categories = Category::all();
 
-            // B. Logic Badge Notifikasi (New)
+            // B. Logic Badge Notifikasi Customer
             $badgeOrders = 0;
             $badgeBargains = 0;
 
-            // Cek apakah ada user yang login?
             if (Auth::check()) {
                 $userId = Auth::id();
 
-                // Hitung Order yg butuh perhatian (Belum Bayar / Ditolak Admin)
-                // Karena kalau ditolak, statusnya balik ke 'menunggu_pembayaran'
+                // Hitung order dengan status 'menunggu pembayaran'
                 $badgeOrders = Order::where('user_id', $userId)
                     ->where('status', 'menunggu_pembayaran')
                     ->count();
 
-                // Hitung Tawaran yg sudah direspon (Diterima / Ditolak)
-                // 'pending' ga dihitung karena user cuma nunggu
+                // Hitung tawaran yang sudah direspon Admin tapi belum dibaca Customer
                 $badgeBargains = Bargain::where('user_id', $userId)
-                ->whereIn('status', ['accepted', 'rejected'])
-                ->where('is_read', false) // <--- TAMBAHAN PENTING INI
-                ->count();
+                    ->whereIn('status', ['accepted', 'rejected'])
+                    ->where('is_read', false) 
+                    ->count();
             }
 
-            // Kirim semua variable ke View Navbar
             $view->with('categories', $categories)
                  ->with('badgeOrders', $badgeOrders)
                  ->with('badgeBargains', $badgeBargains);
+        });
+
+        /**
+         * View Composer Khusus Layout Admin Sidebar.
+         * Mengirimkan data notifikasi ke sidebar admin secara real-time.
+         */
+        View::composer('layouts.admin', function ($view) {
+            
+            // Hitung tawaran masuk status 'pending'
+            $notifBargainAdmin = Bargain::where('status', 'pending')->count();
+
+            // Hitung pesanan yang sudah upload bukti tapi belum dicek Admin
+            // Status ini dipicu setelah Customer menekan tombol "Kirim Bukti"
+            $notifOrderAdmin = Order::where('status', 'menunggu_konfirmasi')->count();
+
+            $view->with('notifBargainAdmin', $notifBargainAdmin)
+                 ->with('notifOrderAdmin', $notifOrderAdmin);
         });
     }
 }

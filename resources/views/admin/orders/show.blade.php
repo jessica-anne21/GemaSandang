@@ -24,11 +24,8 @@
         </div>
     @endif
 
-    <div class="row g-4"> {{-- Gunakan g-4 untuk jarak antar kolom yang konsisten --}}
-        
-        {{-- =================================== --}}
-        {{-- KOLOM KIRI: STATUS & INFO UTAMA --}}
-        {{-- =================================== --}}
+    <div class="row g-4"> 
+
         <div class="col-lg-4">
             
             {{-- Card 1: Update Status --}}
@@ -40,7 +37,6 @@
                 </div>
                 <div class="card-body">
                     
-                    {{-- Status Saat Ini --}}
                     <div class="text-center mb-4">
                         <div class="mb-2 text-muted small">Status Saat Ini</div>
                         @if($order->status == 'menunggu_pembayaran')
@@ -74,7 +70,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small text-muted fw-bold">Nomor Resi (Opsional)</label>
+                            <label class="form-label small text-muted fw-bold">Nomor Resi</label>
                             <input type="text" name="nomor_resi" class="form-control form-control-sm" 
                                    value="{{ $order->nomor_resi }}" placeholder="Input resi jika dikirim...">
                         </div>
@@ -103,7 +99,6 @@
                         </li>
                         <li class="list-group-item px-0 d-flex justify-content-between align-items-center border-bottom">
                             <span class="text-muted small">Nomor HP</span>
-                            {{-- Ambil dari order dulu, kalau null ambil dari user --}}
                             <span class="fw-bold text-end">
                                 {{ $order->nomor_hp ?? $order->user->nomor_hp ?? '-' }}
                             </span>
@@ -137,12 +132,7 @@
 
         </div>
 
-        {{-- =================================== --}}
-        {{-- KOLOM KANAN: BUKTI & RINCIAN BARANG --}}
-        {{-- =================================== --}}
         <div class="col-lg-8">
-            
-            {{-- A. BUKTI PEMBAYARAN (Hanya muncul jika ada) --}}
             @if($order->bukti_bayar)
             <div class="card shadow-sm border-0 mb-4" style="border-radius: 0.75rem;">
                 <div class="card-header bg-white border-0 py-3">
@@ -152,13 +142,11 @@
                 </div>
                 <div class="card-body">
                     <div class="row align-items-center">
-                        {{-- Gambar di kiri (kecil) --}}
                         <div class="col-md-4 text-center">
                             <div class="border rounded p-1 d-inline-block bg-light">
                                 <img src="{{ asset('storage/' . $order->bukti_bayar) }}" alt="Bukti Transfer" class="img-fluid rounded" style="max-height: 150px; object-fit: contain;">
                             </div>
                         </div>
-                        {{-- Keterangan & Tombol di kanan --}}
                         <div class="col-md-8">
                             <p class="text-muted small mb-2">
                                 Pelanggan telah mengupload bukti pembayaran. Silakan cek validitasnya sebelum mengubah status menjadi <strong>"Dikirim"</strong>.
@@ -170,7 +158,6 @@
                                 <a href="{{ asset('storage/' . $order->bukti_bayar) }}" download class="btn btn-sm btn-outline-secondary">
                                     <i class="bi bi-download me-1"></i> Download
                                 </a>
-                                {{-- Tombol Tolak Bukti --}}
                                 <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal">
                                     <i class="bi bi-x-circle me-1"></i> Tolak
                                 </button>
@@ -180,7 +167,6 @@
                 </div>
             </div>
 
-            {{-- Modal Tolak Bukti --}}
             <div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -208,7 +194,6 @@
             </div>
             @endif
 
-            {{-- B. RINCIAN BARANG --}}
             <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
                 <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
                     <h6 class="mb-0 fw-bold text-uppercase" style="color: var(--primary-color); letter-spacing: 1px;">

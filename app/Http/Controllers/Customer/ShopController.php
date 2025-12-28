@@ -11,7 +11,7 @@ class ShopController extends Controller
 {
     public function index()
     {
-        // LOGIC SHOPEE STYLE: Stok > 0 di atas, Stok = 0 di bawah
+        // Stok > 0 di atas, Stok = 0 di bawah
         $products = Product::with('category')
             ->orderByRaw('stok = 0, created_at DESC')
             ->get();
@@ -26,7 +26,7 @@ class ShopController extends Controller
 
         $products = Product::with('category')
             ->where('nama_produk', 'LIKE', "%{$query}%")
-            ->orderByRaw('stok = 0, created_at DESC') // Tetap urutkan stok di hasil cari
+            ->orderByRaw('stok = 0, created_at DESC') 
             ->get();
 
         return view('customer.shop', compact('products', 'query'));

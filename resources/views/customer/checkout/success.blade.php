@@ -3,39 +3,26 @@
 @section('content')
 <div class="container my-5 py-5">
     
-    {{-- Hitung sisa waktu di Server (PHP) agar akurat --}}
     @php
-        // SETTING WAKTU: Sesuaikan dengan controller kamu (misal 1 menit atau 24 jam)
-        // Kalau production nanti ubah jadi: $limitInMinutes = 24 * 60;
-        $limitInMinutes = 1; 
+        $limitInMinutes = 24 * 60; // 24 Jam
         $expiryTime = $order->created_at->addMinutes($limitInMinutes);
         $remainingSeconds = now()->diffInSeconds($expiryTime, false);
     @endphp
 
-    {{-- KONDISI 1: Menunggu Pembayaran (Belum Upload atau Ditolak) --}}
     @if($order->status == 'menunggu_pembayaran' && !$order->bukti_bayar)
         
-        {{-- A. JIKA WAKTU SUDAH HABIS (Expired di Server) --}}
         @if($remainingSeconds <= 0)
             <div class="row justify-content-center">
                 <div class="col-lg-6 text-center">
                     <div class="card border-0 shadow-sm p-5">
-                        <div class="mb-3">
-                            <i class="bi bi-x-circle-fill text-danger" style="font-size: 4rem;"></i>
-                        </div>
+                        <div class="mb-3"><i class="bi bi-x-circle-fill text-danger" style="font-size: 4rem;"></i></div>
                         <h2 class="mb-3" style="font-family: 'Playfair Display', serif;">Waktu Habis</h2>
-                        <p class="text-muted mb-4">
-                            Maaf, batas waktu pembayaran untuk pesanan #{{ $order->id }} telah berakhir.
-                            Silakan lakukan pemesanan ulang.
-                        </p>
+                        <p class="text-muted mb-4">Batas waktu pembayaran untuk pesanan #{{ $order->id }} telah berakhir.</p>
                         <a href="{{ route('shop') }}" class="btn btn-custom px-4">Kembali ke Toko</a>
                     </div>
                 </div>
             </div>
-
-        {{-- B. JIKA WAKTU MASIH ADA --}}
         @else
-            {{-- TAMPILAN COUNTDOWN --}}
             <div class="row justify-content-center mb-4">
                 <div class="col-12 text-center">
                     <i class="bi bi-hourglass-split text-warning" style="font-size: 3rem;"></i>
@@ -44,15 +31,18 @@
                     <div class="mt-3 mb-2">
                         <p class="text-muted mb-1">Batas waktu pembayaran:</p>
                         <div id="countdown-display" class="badge bg-danger fs-5 px-4 py-2 rounded-pill shadow-sm">
-                            {{ sprintf('%02d:%02d', floor($remainingSeconds / 60), $remainingSeconds % 60) }}
+                            @php
+                                $h = floor($remainingSeconds / 3600);
+                                $m = floor(($remainingSeconds % 3600) / 60);
+                                $s = $remainingSeconds % 60;
+                                echo sprintf('%02d:%02d:%02d', $h, $m, $s);
+                            @endphp
                         </div>
                     </div>
-                    
                     <p class="text-muted small">Pesanan #{{ $order->id }} akan otomatis dibatalkan jika waktu habis.</p>
                 </div>
             </div>
 
-            {{-- === [FITUR BARU] ALERT JIKA PEMBAYARAN DITOLAK === --}}
             @if($order->catatan_admin)
                 <div class="row justify-content-center mb-4">
                     <div class="col-lg-10">
@@ -61,23 +51,19 @@
                             <div>
                                 <h5 class="alert-heading fw-bold mb-1">Pembayaran Ditolak!</h5>
                                 <p class="mb-0">Alasan: <strong>{{ $order->catatan_admin }}</strong></p>
-                                <small>Silakan perbaiki dan upload ulang bukti pembayaran di bawah ini.</small>
                             </div>
                         </div>
                     </div>
                 </div>
             @endif
-            {{-- ================================================== --}}
 
             <div class="row justify-content-center">
                 <div class="col-lg-10">
                     <div class="row g-4">
-                        {{-- Info Rekening --}}
                         <div class="col-md-6">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-body p-4">
                                     <h5 class="mb-4" style="color: var(--primary-color);">1. Transfer Manual</h5>
-                                    
                                     <div class="d-flex align-items-center justify-content-between p-3 border rounded bg-light mb-3">
                                         <div>
                                             <div class="fw-bold">BCA</div>
@@ -88,33 +74,26 @@
                                             <small class="text-primary" style="cursor: pointer;" onclick="navigator.clipboard.writeText('1234567890'); alert('Tersalin!');">Salin</small>
                                         </div>
                                     </div>
-
                                     <div class="alert alert-warning mb-0">
-                                        <small class="d-block text-muted mb-1">Total Bayar:</small>
+                                        <small class="d-block text-muted">Total Bayar:</small>
                                         <h4 class="mb-0 fw-bold text-dark">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Form Upload --}}
                         <div class="col-md-6">
                             <div class="card border-0 shadow-sm h-100">
                                 <div class="card-body p-4">
                                     <h5 class="mb-4" style="color: var(--primary-color);">2. Kirim Bukti</h5>
-                                    
                                     <form action="{{ route('checkout.payment.upload', $order->id) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         <div class="mb-4 text-center p-4 border border-dashed rounded bg-light">
                                             <i class="bi bi-cloud-upload display-4 text-muted mb-2"></i>
                                             <input type="file" name="bukti_bayar" class="form-control" required>
-                                            <div class="form-text text-muted mt-2">Format: JPG, PNG, JPEG. Max: 2MB</div>
                                         </div>
-                                        <button type="submit" class="btn btn-custom w-100 py-2">
-                                            <i class="bi bi-send-fill me-2"></i> Kirim Bukti
-                                        </button>
+                                        <button type="submit" class="btn btn-custom w-100 py-2">Kirim Bukti</button>
                                     </form>
-
                                 </div>
                             </div>
                         </div>
@@ -123,28 +102,14 @@
             </div>
         @endif
 
-    {{-- KONDISI 2: Menunggu Konfirmasi (Bukti sudah ada) --}}
     @elseif($order->status == 'menunggu_konfirmasi' || $order->bukti_bayar)
         <div class="row justify-content-center">
             <div class="col-lg-6 text-center">
                 <div class="card border-0 shadow-sm p-5">
                     <div class="mb-3"><i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i></div>
                     <h2 class="mb-3" style="font-family: 'Playfair Display', serif;">Bukti Diterima!</h2>
-                    <p class="text-muted mb-4">Terima kasih. Kami sedang memverifikasi pembayaran Anda.</p>
-                    <a href="{{ route('orders.index') }}" class="btn btn-custom px-4">Lihat Pesanan Saya</a>
-                </div>
-            </div>
-        </div>
-
-    {{-- KONDISI 3: Pesanan Dibatalkan --}}
-    @elseif($order->status == 'dibatalkan')
-        <div class="row justify-content-center">
-            <div class="col-lg-6 text-center">
-                <div class="card border-0 shadow-sm p-5">
-                    <div class="mb-3"><i class="bi bi-x-circle-fill text-danger" style="font-size: 4rem;"></i></div>
-                    <h2 class="mb-3" style="font-family: 'Playfair Display', serif;">Pesanan Dibatalkan</h2>
-                    <p class="text-muted mb-4">Waktu pembayaran habis atau pesanan dibatalkan.</p>
-                    <a href="{{ route('shop') }}" class="btn btn-custom px-4">Belanja Lagi</a>
+                    <p class="text-muted mb-4">Kami sedang memverifikasi pembayaran Anda.</p>
+                    <a href="{{ route('orders.index') }}" class="btn btn-custom px-4">Lihat Pesanan</a>
                 </div>
             </div>
         </div>
@@ -156,15 +121,10 @@
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Ambil elemen
         const timerElement = document.getElementById('countdown-display');
         
-        // Pastikan elemen ada (hanya jalan di kondisi Waiting Payment)
         if (timerElement) {
-            // Ambil sisa detik awal dari PHP
             const initialSeconds = parseInt("{{ $remainingSeconds ?? 0 }}");
-            
-            // Tentukan WAKTU DEADLINE PASTI
             const deadline = new Date().getTime() + (initialSeconds * 1000);
 
             const countdownInterval = setInterval(() => {
@@ -172,22 +132,18 @@
                 const distance = deadline - now;
 
                 if (distance > 0) {
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                     const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                     timerElement.textContent = 
+                        hours.toString().padStart(2, '0') + ":" + 
                         minutes.toString().padStart(2, '0') + ":" + 
                         seconds.toString().padStart(2, '0');
                 } else {
                     clearInterval(countdownInterval);
                     timerElement.innerHTML = "EXPIRED";
-                    timerElement.classList.remove('bg-danger');
-                    timerElement.classList.add('bg-secondary');
-                    
-                    // Reload halaman biar masuk ke Kondisi 1A (Tampilan Waktu Habis)
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    setTimeout(() => { window.location.reload(); }, 1000);
                 }
             }, 1000);
         }

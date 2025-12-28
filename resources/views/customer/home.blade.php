@@ -1,9 +1,7 @@
 @extends('layouts.main')
 
 @section('styles')
-<style>
-    /* === STYLE KUSTOM === */
-    
+<style>    
     .product-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease; 
         background-color: #fff;
@@ -14,7 +12,6 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; 
     }
     
-    /* Style untuk Info Bar */
     .info-box {
         border-right: 1px solid #eee;
     }
@@ -34,7 +31,6 @@
         }
     }
 
-    /* Style Sold Out Badge */
     .sold-out-badge {
         position: absolute;
         top: 50%; left: 50%;
@@ -58,7 +54,6 @@
 
 @section('content')
 
-{{-- === HERO SECTION === --}}
 <div class="container text-center hero-section" style="position: relative;">
     <div>
         <h1 class="display-3">Gema Sandang</h1>
@@ -69,32 +64,26 @@
                 @include('layouts.partials.search-bar')
             </div>
         </div>
-
-        {{-- ARROW BIRU SUDAH DIHAPUS --}}
     </div>
 </div>
 
-{{-- === INFO BAR (USP) === --}}
 <div class="container mt-2 mb-5" id="info-penting">
     <div class="row justify-content-center">
         <div class="col-lg-9">
             <div class="d-flex flex-column flex-md-row justify-content-around text-center p-4 border rounded-4 shadow-sm bg-white">
                 
-                {{-- Info 1: Fitur Nego --}}
                 <div class="info-box px-3 flex-fill">
                     <i class="bi bi-tags-fill text-warning fs-3 mb-2 d-block"></i>
                     <h6 class="fw-bold mb-1 text-uppercase" style="letter-spacing: 1px;">Bisa Nego</h6>
                     <small class="text-muted">Semua item boleh ditawar sesukanya!</small>
                 </div>
 
-                {{-- Info 2: Kondisi Barang --}}
                 <div class="info-box px-3 flex-fill">
                     <i class="bi bi-stars text-primary fs-3 mb-2 d-block"></i>
                     <h6 class="fw-bold mb-1 text-uppercase" style="letter-spacing: 1px;">Siap Pakai</h6>
                     <small class="text-muted">Sudah dilaundry, wangi & higienis.</small>
                 </div>
 
-                {{-- Info 3: Keaslian --}}
                 <div class="info-box px-3 flex-fill">
                     <i class="bi bi-gem text-danger fs-3 mb-2 d-block"></i>
                     <h6 class="fw-bold mb-1 text-uppercase" style="letter-spacing: 1px;">Vintage Asli</h6>
@@ -106,7 +95,6 @@
     </div>
 </div>
 
-{{-- === KOLEKSI TERBARU === --}}
 <div class="container my-5" id="koleksi-terbaru">
     <div class="row text-center mb-4">
         <div class="col">
@@ -115,7 +103,6 @@
         </div>
     </div>
 
-    {{-- Alerts --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
@@ -136,21 +123,17 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
-    {{-- End Alerts --}}
     
     <div class="row">
         @forelse ($products as $product)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                {{-- Logika Sold Out: Tambah class jika stok 0 --}}
                 <div class="card h-100 border-0 shadow-sm product-card {{ $product->stok == 0 ? 'product-sold-out' : '' }}">
 
-                    {{-- Wrapper Gambar --}}
                     <div class="position-relative">
                         <a href="{{ route('product.show', $product) }}">
                             <img src="{{ asset('storage/' . $product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="height: 300px; object-fit: cover;">
                         </a>
 
-                        {{-- Tampilkan Badge SOLD OUT jika stok 0 --}}
                         @if($product->stok == 0)
                             <div class="sold-out-badge">SOLD OUT</div>
                         @endif
@@ -161,22 +144,18 @@
                         <div class="small text-muted mb-1">{{ $product->category->nama_kategori }}</div>
 
                         <a href="{{ route('product.show', $product) }}" class="text-decoration-none" style="color: inherit;">
-                            <h5 class="card-title text-truncate" style="font-family: 'Playfair Display', serif;">{{ $product->nama_produk }}</h5>
+                            <h5 class="card-title" style="font-family: 'Playfair Display', serif;">{{ $product->nama_produk }}</h5>
                         </a>
                         
-                        {{-- HARGA SAJA (TANPA LABEL NEGO) --}}
                         <div class="mt-auto">
                             <h6 class="fw-bold mb-0" style="color: var(--primary-color); font-size: 1.1rem;">
                                 Rp {{ number_format($product->harga, 0, ',', '.') }}
                             </h6>
-                            {{-- Info "Bisa Nego" sudah dihapus --}}
                         </div>
                         
                         <div class="mt-3 d-grid gap-2">
-                            {{-- Tombol Detail --}}
                             <a href="{{ route('product.show', $product) }}" class="btn btn-outline-dark btn-sm">Detail</a>
                             
-                            {{-- Logika Tombol Add to Cart --}}
                             @if($product->stok > 0)
                                 @auth
                                 <form action="{{ route('cart.store') }}" method="POST" class="d-grid">
@@ -192,7 +171,6 @@
                                 </a>
                                 @endguest
                             @else
-                                {{-- JIKA STOK 0 --}}
                                 <button class="btn btn-secondary btn-sm" disabled>Stok Habis</button>
                             @endif
                         </div>

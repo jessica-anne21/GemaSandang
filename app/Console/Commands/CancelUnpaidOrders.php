@@ -17,17 +17,14 @@ class CancelUnpaidOrders extends Command
     protected $signature = 'orders:cancel-unpaid';
 
     /**
-     * Deskripsi perintah.
+     * Deskripsi perintah. 
      */
-    protected $description = 'Batalkan pesanan yang belum dibayar setelah batas waktu (1 menit untuk testing)';
+    protected $description = 'Membatalkan pesanan yang belum dibayar setelah melewati batas waktu 24 jam';
 
     public function handle()
     {
-        // SETTING WAKTU: 1 menit untuk testing.
-        // Nanti kalau sudah oke, ganti menjadi subHours(24)
-        $expiredTime = Carbon::now()->subMinutes(1);
+        $expiredTime = Carbon::now()->subHours(24);
 
-        // Ambil pesanan yang masih 'menunggu_pembayaran' dan sudah expired
         $orders = Order::where('status', 'menunggu_pembayaran')
                        ->where('created_at', '<', $expiredTime)
                        ->get();
@@ -38,29 +35,28 @@ class CancelUnpaidOrders extends Command
         }
 
         foreach ($orders as $order) {
-            // Gunakan Transaction agar perubahan status & stok aman (all or nothing)
+            // Gunakan Transaction agar perubahan status & stok aman 
             DB::transaction(function () use ($order) {
                 
                 // 1. Kembalikan stok produk
                 foreach ($order->items as $item) {
                     $product = Product::find($item->product_id);
                     if ($product) {
-                        // Menggunakan 'kuantitas' sesuai file OrderItem.php kamu
                         $product->increment('stok', $item->kuantitas);
                     }
                 }
 
-                // 2. UPDATE STATUS ORDER & CATATAN ADMIN
+                // 2. Update status order
                 $order->update([
                     'status' => 'dibatalkan',
-                    'catatan_admin' => 'Dibatalkan otomatis oleh sistem (Melewati batas waktu pembayaran).' 
+                    'catatan_admin' => 'Dibatalkan otomatis oleh sistem (Melewati batas waktu pembayaran 24 jam).' 
                 ]);
 
             });
             
-            $this->info("Order ID #{$order->id} berhasil dibatalkan, stok dikembalikan & catatan disimpan.");
+            $this->info("Order ID #{$order->id} berhasil dibatalkan, stok dikembalikan.");
         }
 
-        $this->info("Proses selesai.");
+        $this->info("Proses selesai: Total " . $orders->count() . " pesanan dibatalkan.");
     }
 }

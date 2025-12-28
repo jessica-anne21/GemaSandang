@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800" style="font-family: 'Playfair Display', serif;">Daftar Negosiasi Harga</h1>
+    <h1 class="h3 mb-4 text-gray-800" style="font-family: 'Playfair Display', serif; color: #800000;">Daftar Negosiasi Harga</h1>
 
     @if(session('success'))
         <div class="alert alert-success shadow-sm border-0">{{ session('success') }}</div>
@@ -15,7 +15,6 @@
                     <tr>
                         <th class="p-3 ps-4">Produk</th>
                         <th class="p-3">Pelanggan</th>
-                        {{-- KOLOM STOK (Penting buat Admin) --}}
                         <th class="p-3">Stok</th> 
                         <th class="p-3">Harga Asli</th>
                         <th class="p-3">Tawaran</th>
@@ -58,7 +57,6 @@
                             </td>
                             
                             <td class="p-3 text-end pe-4">
-                                {{-- LOGIKA TOMBOL AKSI --}}
                                 @if($bargain->status == 'pending')
                                     
                                     {{-- TOMBOL TERIMA (Hanya jika stok ada) --}}
@@ -78,7 +76,7 @@
                                         </button>
                                     @endif
 
-                                    {{-- TOMBOL TOLAK (Memicu Modal Tolak) --}}
+                                    {{-- TOMBOL TOLAK --}}
                                     <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1" data-bs-toggle="modal" data-bs-target="#rejectModal-{{ $bargain->id }}">
                                         <i class="bi bi-x-lg"></i> Tolak
                                     </button>
@@ -86,7 +84,6 @@
                                 @else
                                     {{-- KONDISI JIKA STATUS SUDAH SELESAI --}}
 
-                                    {{-- A. JIKA STATUS DITERIMA (Bisa Dibatalkan kalau customer HNR) --}}
                                     @if($bargain->status == 'accepted')
                                         <small class="text-success fw-bold d-block mb-1">
                                             <i class="bi bi-check-circle-fill"></i> Deal
@@ -127,7 +124,6 @@
                                             </div>
                                         </div>
 
-                                    {{-- B. JIKA STATUS DITOLAK (Cuma bisa liat alasan) --}}
                                     @else
                                         <small class="text-muted d-block">{{ $bargain->updated_at->format('d/m/y H:i') }}</small>
                                         
@@ -157,7 +153,6 @@
                             </td>
                         </tr>
 
-                        {{-- === MODAL TOLAK UTAMA (Untuk Pending -> Rejected) === --}}
                         <div class="modal fade" id="rejectModal-{{ $bargain->id }}" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content border-0 shadow">
@@ -188,7 +183,6 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- === END MODAL === --}}
 
                     @empty
                         <tr>

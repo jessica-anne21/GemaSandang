@@ -29,7 +29,6 @@ class CheckoutController extends Controller
             'kurir' => 'required|string',
             'ongkir' => 'required|numeric',
             'nomor_hp' => 'required|string|max:15',
-            // Sesuaikan nama field dengan di View blade (catatan_customer)
             'catatan_customer' => 'nullable|string|max:1000', 
         ]);
 
@@ -39,9 +38,6 @@ class CheckoutController extends Controller
             return redirect()->route('shop');
         }
 
-        // === FITUR BARU: AUTO-UPDATE PROFIL USER ===
-        // Logic: Jika input beda dengan data di profil, update profilnya.
-        // Biar next order form-nya otomatis keisi data terbaru.
         $user = Auth::user();
         if ($user->alamat !== $request->alamat_pengiriman || $user->nomor_hp !== $request->nomor_hp) {
             $user->update([
@@ -49,12 +45,11 @@ class CheckoutController extends Controller
                 'nomor_hp' => $request->nomor_hp
             ]);
         }
-        // ============================================
 
         DB::beginTransaction();
 
         try {
-            // 2. Hitung Total (Cukup sekali loop)
+            // 2. Hitung Total 
             $subtotal = 0;
             foreach ($cart as $details) {
                 $subtotal += $details['price'] * $details['quantity'];
@@ -70,13 +65,12 @@ class CheckoutController extends Controller
                 'kurir' => $request->kurir,
                 'ongkir' => $request->ongkir,
                 'nomor_hp' => $request->nomor_hp, 
-                // Pastikan nama kolom di database sesuai (catatan_customer)
                 'catatan_customer' => $request->catatan_customer, 
             ]);
 
             // 4. Loop Barang & Kurangi Stok
             foreach ($cart as $id => $details) {
-                // Lock produk biar aman dari rebutan stok (Race Condition)
+                // Lock produk agar aman dari rebutan stok (Race Condition)
                 $product = Product::lockForUpdate()->find($id); 
 
                 // Cek ketersediaan stok
@@ -91,7 +85,6 @@ class CheckoutController extends Controller
                     'order_id' => $order->id,
                     'product_id' => $id,
                     'kuantitas' => $details['quantity'],
-                    // Best Practice: Simpan harga saat ini, bukan ambil dari master produk
                     'harga_saat_beli' => $details['price'], 
                 ]);
 

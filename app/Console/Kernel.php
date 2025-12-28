@@ -7,20 +7,11 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
-    /**
-     * Define the application's command schedule.
-     * (Di sini tempat mengatur jadwal otomatis)
-     */
     protected function schedule(Schedule $schedule): void
     {
-        // === INI PERINTAH SUPAYA JALAN OTOMATIS SETIAP MENIT ===
         $schedule->command('orders:cancel-unpaid')->everyMinute();
     }
 
-    /**
-     * Register the commands for the application.
-     * (Ini supaya Laravel membaca file command yang kamu buat di folder Commands)
-     */
     protected function commands(): void
     {
         $this->load(__DIR__.'/Commands');

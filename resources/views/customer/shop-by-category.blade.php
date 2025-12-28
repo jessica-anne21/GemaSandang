@@ -1,6 +1,5 @@
 @extends('layouts.main')
 
-{{-- Menambahkan CSS kustom untuk efek hover kartu dan Sold Out --}}
 @section('styles')
 <style>
     .product-card {
@@ -12,18 +11,17 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; 
     }
 
-    /* NEW: Sold Out Styles */
     .product-sold-out {
-        opacity: 0.6; /* Membuat agak transparan */
-        filter: grayscale(100%); /* Membuat jadi hitam putih / abu-abu */
-        position: relative; /* Penting untuk positioning badge */
+        opacity: 0.6;
+        filter: grayscale(100%); 
+        position: relative; 
     }
     .sold-out-badge {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: rgba(141, 75, 85, 0.85); /* Warna Primary Anda dengan transparansi */
+        background-color: rgba(141, 75, 85, 0.85); 
         color: white;
         padding: 10px 20px;
         font-weight: bold;
@@ -31,13 +29,13 @@
         text-transform: uppercase;
         z-index: 10;
         border-radius: 5px;
-        pointer-events: none; /* Agar tidak mengganggu klik di bawahnya */
+        pointer-events: none; 
     }
     .product-card:hover.product-sold-out {
-        transform: translateY(-8px); /* Efek hover tetap jalan */
+        transform: translateY(-8px); 
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-        opacity: 0.6; /* Pertahankan opacity */
-        filter: grayscale(100%); /* Pertahankan grayscale */
+        opacity: 0.6; 
+        filter: grayscale(100%); 
     }
 </style>
 @endsection
@@ -71,16 +69,13 @@
     <div class="row">
         @forelse ($products as $product)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                {{-- Logika Sold Out: Tambah class jika stok 0 --}}
                 <div class="card h-100 border-0 shadow-sm product-card {{ $product->stok == 0 ? 'product-sold-out' : '' }}">
 
-                    {{-- Wrapper Gambar (Penting untuk posisi SOLD OUT badge) --}}
                     <div class="position-relative">
                         <a href="{{ route('product.show', $product) }}">
                             <img src="{{ asset('storage/' . $product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="height: 300px; object-fit: cover;">
                         </a>
 
-                        {{-- Tampilkan Badge SOLD OUT jika stok 0 --}}
                         @if($product->stok == 0)
                             <div class="sold-out-badge">SOLD OUT</div>
                         @endif
@@ -101,10 +96,8 @@
                         <div class="mt-3 d-grid gap-2"> 
                             <a href="{{ route('product.show', $product) }}" class="btn btn-outline-dark">Detail</a>
                             
-                            {{-- Logika Tombol Add to Cart --}}
                             @if($product->stok > 0)
                                 @auth
-                                {{-- Jika sudah login dan stok > 0, tampilkan form Add to Cart --}}
                                 <form action="{{ route('cart.store') }}" method="POST" class="d-grid">
                                     @csrf
                                     <input type="hidden" name="product_id" value="{{ $product->id }}">
@@ -113,13 +106,11 @@
                                     </button>
                                 </form>
                                 @elseguest
-                                {{-- Jika masih guest, tampilkan tombol menuju Login --}}
                                 <a href="{{ route('login') }}" class="btn btn-custom">
                                     <i class="bi bi-box-arrow-in-right"></i> Login to Buy
                                 </a>
                                 @endguest
                             @else
-                                {{-- JIKA STOK 0, TAMPILKAN TOMBOL SOLD OUT MATI --}}
                                 <button class="btn btn-secondary" disabled>Stok Habis</button>
                             @endif
                         </div>

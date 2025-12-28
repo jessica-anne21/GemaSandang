@@ -23,44 +23,42 @@ class AdminBargainController extends Controller
     /**
      * Memproses tawaran (Terima/Tolak).
      */
-public function update(Request $request, $id)
-{
-    $bargain = Bargain::findOrFail($id);
+    public function update(Request $request, $id)
+    {
+        $bargain = Bargain::findOrFail($id);
 
-    $request->validate([
-        'status' => 'required|in:accepted,rejected',
-        'catatan_admin' => 'nullable|string|max:255',
-    ]);
+        $request->validate([
+            'status' => 'required|in:accepted,rejected',
+            'catatan_admin' => 'nullable|string|max:255',
+        ]);
 
-    $bargain->update([
-        'status' => $request->status,
-        'catatan_admin' => $request->catatan_admin,
-    ]);
+        $bargain->update([
+            'status' => $request->status,
+            'catatan_admin' => $request->catatan_admin,
+        ]);
 
-    return back()->with(
-        'success',
-        $request->status === 'accepted'
-            ? 'Tawaran berhasil diterima.'
-            : 'Tawaran berhasil ditolak.'
-    );
-}
+        return back()->with(
+            'success',
+            $request->status === 'accepted'
+                ? 'Tawaran berhasil diterima.'
+                : 'Tawaran berhasil ditolak.'
+        );
+    }
 
-public function reject(Request $request, $id)
-{
-    $bargain = Bargain::findOrFail($id);
-    
-    // Validasi input catatan (opsional, tapi disarankan required biar admin ga males ngisi)
-    $request->validate([
-        'catatan_admin' => 'required|string|max:255'
-    ]);
+    public function reject(Request $request, $id)
+    {
+        $bargain = Bargain::findOrFail($id);
+        
+        $request->validate([
+            'catatan_admin' => 'required|string|max:255'
+        ]);
 
-    $bargain->update([
-        'status' => 'rejected',
-        'catatan_admin' => $request->catatan_admin // Simpan catatannya
-    ]);
+        $bargain->update([
+            'status' => 'rejected',
+            'catatan_admin' => $request->catatan_admin 
+        ]);
 
-    return redirect()->back()->with('success', 'Tawaran ditolak dan catatan telah dikirim ke customer.');
-}
-
+        return redirect()->back()->with('success', 'Tawaran ditolak dan catatan telah dikirim ke customer.');
+    }
 
 }

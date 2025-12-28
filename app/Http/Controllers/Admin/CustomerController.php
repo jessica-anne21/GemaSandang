@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -40,7 +41,7 @@ class CustomerController extends Controller
             $q->latest();
         }])->findOrFail($id);
 
-        // Validasi: Pastikan role-nya customer
+        // Validasi role
         if ($customer->role !== 'customer') {
             return redirect()->route('admin.customers.index')
                 ->with('error', 'User tersebut bukan pelanggan.');
@@ -50,8 +51,10 @@ class CustomerController extends Controller
         $totalSpent = $customer->orders->where('status', 'selesai')->sum('total_harga');
         
         // Hitung total pesanan
-        $totalOrders = $customer->orders->count();
+        $totalPesananSelesai = Order::where('user_id', $id)
+                                ->where('status', 'selesai')
+                                ->count();
 
-        return view('admin.customers.show', compact('customer', 'totalSpent', 'totalOrders'));
+        return view('admin.customers.show', compact('customer', 'totalSpent', 'totalPesananSelesai'));
     }
 }

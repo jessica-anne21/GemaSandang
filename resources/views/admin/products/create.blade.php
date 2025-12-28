@@ -6,7 +6,6 @@
     
     <div class="card shadow-sm border-0" style="border-radius: 0.75rem;">
         <div class="card-body p-4">
-            {{-- PENTING: enctype untuk upload file --}}
             <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
@@ -40,9 +39,8 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="stok" class="form-label">Stok</label>
-                        <input type="number" class="form-control @error('stok') is-invalid @enderror" 
-                               id="stok" name="stok" value="{{ old('stok') }}" required>
-                        @error('stok') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                        <input type="number" class="form-control bg-light" 
+                               id="stok" name="stok" value="1" readonly>
                     </div>
                 </div>
 
@@ -58,9 +56,9 @@
                     @error('foto_produk') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
                 
-                <div class="text-end">
-                    <a href="{{ route('admin.products.index') }}" class="btn btn-secondary">Batal</a>
-                    <button type="submit" class="btn btn-custom">Simpan Produk</button>
+                <div class="text-end mt-4">
+                    <a href="{{ route('admin.products.index') }}" class="btn btn-secondary px-4 rounded-pill">Batal</a>
+                    <button type="submit" class="btn btn-custom px-4 rounded-pill">Simpan Produk</button>
                 </div>
             </form>
         </div>

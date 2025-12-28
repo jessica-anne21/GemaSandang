@@ -20,7 +20,7 @@ Route::get('/kategori/{category}', [ShopController::class, 'showByCategory'])->n
 Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/login', [AdminLoginController::class, 'create'])
-        ->middleware('guest') // 'guest' agar admin yg sudah login tdk bisa ke sini
+        ->middleware('guest') // 'guest' agar admin yang sudah login tidak bisa ke sini
         ->name('login');
 
     Route::post('/login', [AdminLoginController::class, 'store'])
@@ -30,7 +30,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->middleware('auth') // 'auth' karena hanya user yg login yg bisa logout
         ->name('logout');
 
-    // Rute untuk dashboard admin (dilindungi middleware 'auth' DAN 'admin')
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])
         ->middleware(['auth', 'admin']) 
         ->name('dashboard');
@@ -46,7 +45,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/bargains', [AdminBargainController::class, 'index'])
             ->name('bargains.index');
 
-        // Update status tawaran (accept / reject)
     Route::put('/bargains/{id}', [AdminBargainController::class, 'update'])
         ->name('bargains.update');
 });
@@ -55,7 +53,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [HomeController::class, 'about'])->name('about');
 Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
-
 Route::get('/shop', [ShopController::class, 'index'])->name('shop');
 Route::get('/produk/{product}', [ShopController::class, 'show'])->name('product.show');
 Route::get('/search', [ShopController::class, 'search'])->name('product.search');
@@ -75,6 +72,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     ->name('cart.add.bargain');
 });
 
+Route::get('/cart', [CartController::class, 'index'])->middleware('auth')->name('cart.index');
+Route::post('/cart/add', [CartController::class, 'store'])->name('cart.store');
+Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -85,9 +85,5 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-Route::get('/cart', [CartController::class, 'index'])->middleware('auth')->name('cart.index');
-Route::post('/cart/add', [CartController::class, 'store'])->name('cart.store');
-Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
 require __DIR__.'/auth.php';

@@ -34,7 +34,6 @@
                                         <span class="badge bg-primary mb-2">Sedang Dikirim</span>
                                         <div class="small text-muted mb-2">Resi: {{ $order->nomor_resi }}</div>
                                         
-                                        {{-- TOMBOL KONFIRMASI TERIMA --}}
                                         <form action="{{ route('orders.complete', $order->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Apakah barang sudah benar-benar diterima dan dalam kondisi baik?')">
