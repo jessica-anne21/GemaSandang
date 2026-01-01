@@ -64,6 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/checkout/success/{order}', [CheckoutController::class, 'success'])->name('checkout.success');
     Route::post('/checkout/payment/{order}', [CheckoutController::class, 'uploadProof'])->name('checkout.payment.upload');
     Route::post('/orders/{order}/complete', [OrderController::class, 'markAsCompleted'])->name('orders.complete');
+    Route::get('/my-orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/bargains', [CustomerBargainController::class, 'store'])
         ->name('bargains.store');
     Route::get('/my-bargains', [CustomerBargainController::class, 'index'])

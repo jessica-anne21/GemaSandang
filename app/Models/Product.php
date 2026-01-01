@@ -23,9 +23,6 @@ class Product extends Model
         'foto_produk', 
     ];
 
-    /**
-     * Mendefinisikan relasi "belongsTo" ke model Category.
-     */
     public function category()
     {
         return $this->belongsTo(Category::class);
@@ -34,5 +31,11 @@ class Product extends Model
     public function orderItem() 
     {
         return $this->hasOne(OrderItem::class); 
+    }
+
+    public function bargains()
+    {
+        // Satu produk bisa memiliki banyak tawaran
+        return $this->hasMany(Bargain::class);
     }
 }

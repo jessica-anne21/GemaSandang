@@ -57,55 +57,12 @@
                                 </td>
                                 <td class="text-end fw-bold">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</td>
                                 <td class="text-center">
-                                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#detailModal-{{ $order->id }}">
-                                        Detail
-                                    </button>
+                                    <a href="{{ route('orders.show', $order->id) }}" class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                        Detail Pesanan
+                                    </a>
                                 </td>
                             </tr>
-
-                            <div class="modal fade" id="detailModal-{{ $order->id }}" tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <div class="modal-content border-0 shadow">
-                                        <div class="modal-header border-0">
-                                            <h5 class="modal-title fw-bold">Detail Pesanan #{{ $order->id }}</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body text-start">
-                                            @if($order->status == 'dibatalkan' && $order->catatan_admin)
-                                                <div class="alert alert-danger border-0">
-                                                    <strong>Info dari Admin:</strong> <br>
-                                                    {{ $order->catatan_admin }}
-                                                </div>
-                                            @endif
-
-                                            <h6 class="fw-bold mb-3"><i class="bi bi-bag-check me-2"></i>Produk yang dibeli:</h6>
-                                            <ul class="list-group list-group-flush mb-3">
-                                                @foreach ($order->items as $item)
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                                        <div>
-                                                            <div class="fw-bold">{{ $item->product->nama_produk ?? 'Produk tidak tersedia' }}</div>
-                                                            <small class="text-muted">
-                                                                {{ $item->kuantitas }} x Rp {{ number_format($item->harga_saat_beli, 0, ',', '.') }}
-                                                            </small>
-                                                        </div>
-                                                        <span class="fw-bold">Rp {{ number_format($item->kuantitas * $item->harga_saat_beli, 0, ',', '.') }}</span>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                            <hr>
-                                            <div class="d-flex justify-content-between fw-bold fs-5 mt-2">
-                                                <span>Total Bayar:</span>
-                                                <span class="text-danger">Rp {{ number_format($order->total_harga, 0, ',', '.') }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer border-0">
-                                            @if($order->status == 'menunggu_pembayaran')
-                                                <a href="{{ route('checkout.success', $order->id) }}" class="btn btn-primary">Bayar Sekarang</a>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                                                        
                         @empty
                             <tr>
                                 <td colspan="5" class="text-center py-5 text-muted">

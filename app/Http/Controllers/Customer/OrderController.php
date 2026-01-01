@@ -42,4 +42,13 @@ class OrderController extends Controller
 
         return redirect()->back()->with('success', 'Terima kasih! Pesanan telah selesai.');
     }
+
+    public function show($id)
+    {
+        $order = Order::where('user_id', auth()->id())
+                    ->where('id', $id)
+                    ->firstOrFail();
+
+        return view('customer.orders.show', compact('order'));
+    }
 }
