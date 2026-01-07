@@ -62,6 +62,14 @@ class AppServiceProvider extends ServiceProvider
                  ->with('badgeBargains', $badgeBargains);
         });
 
+        View::composer('*', function ($view) {
+            
+            if (class_exists(Category::class)) {
+                $view->with('categories', Category::all());
+            }
+
+        });
+
         /**
          * View Composer Khusus Layout Admin Sidebar.
          * Mengirimkan data notifikasi ke sidebar admin secara real-time.

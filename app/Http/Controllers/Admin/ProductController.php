@@ -15,7 +15,6 @@ class ProductController extends Controller
      */
     public function index()
     {
-
         $products = Product::with('category')->latest()->paginate(10);
         return view('admin.products.index', compact('products'));
     }
@@ -43,8 +42,8 @@ class ProductController extends Controller
             'foto_produk' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', 
         ]);
 
-        
-        $path = $request->file('foto_produk')->store('products', 'public');
+        // Secara otomatis menyimpan ke folder public/products
+        $path = $request->file('foto_produk')->store('', 'public');
 
         Product::create([
             'nama_produk' => $request->nama_produk,
@@ -84,8 +83,12 @@ class ProductController extends Controller
         $path = $product->foto_produk; 
 
         if ($request->hasFile('foto_produk')) {
-            Storage::disk('public')->delete($product->foto_produk);
-            $path = $request->file('foto_produk')->store('products', 'public');
+            // Hapus foto lama agar tidak nyampah di hosting
+            if ($product->foto_produk) {
+                Storage::disk('public')->delete($product->foto_produk);
+            }
+            // Upload foto baru
+            $path = $request->file('foto_produk')->store('', 'public');
         }
 
         $product->update([
@@ -107,9 +110,14 @@ class ProductController extends Controller
     {
         $product = Product::withCount('orderItems')->findOrFail($id);
 
-        // Cek apakah produk ini sudah pernah dibeli (ada di tabel order_items)
+        // Cek apakah produk ini sudah pernah dibeli (Data Integrity)
         if ($product->order_items_count > 0) {
             return redirect()->back()->with('error', 'Produk tidak bisa dihapus karena sudah tersambung dengan riwayat pesanan pelanggan!');
+        }
+
+        // Hapus file fisik fotonya juga
+        if ($product->foto_produk) {
+            Storage::disk('public')->delete($product->foto_produk);
         }
 
         $product->delete();

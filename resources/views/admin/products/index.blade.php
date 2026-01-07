@@ -28,6 +28,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr class="text-uppercase small fw-bold text-muted">
+                        <th class="p-3 ps-4 border-0">ID</th>
                         <th class="p-3 ps-4">Produk</th>
                         <th class="p-3 text-center">Kategori</th>
                         <th class="p-3 text-center">Harga</th>
@@ -38,14 +39,14 @@
                 <tbody>
                     @forelse($products as $product)
                         <tr>
+                            <td class="p-3 ps-4 fw-bold">#{{ $product->id }}</td>
                             <td class="p-3 ps-4">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset('storage/' . $product->foto_produk) }}" 
+                                    <img src="{{ asset($product->foto_produk) }}" 
                                          class="rounded-3 shadow-sm border me-3" 
                                          style="width: 55px; height: 55px; object-fit: cover;">
                                     <div>
                                         <div class="fw-bold text-dark">{{ $product->nama_produk }}</div>
-                                        <small class="text-muted">ID: #{{ $product->id }}</small>
                                     </div>
                                 </div>
                             </td>

@@ -40,21 +40,32 @@ class OrderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $order = Order::findOrFail($id);
-
+        $order = Order::with('items.product')->findOrFail($id); 
+    
         $request->validate([
             'status' => 'required|in:menunggu_pembayaran,menunggu_konfirmasi,diproses,dikirim,selesai,dibatalkan',
             'nomor_resi' => 'nullable|string|max:255',
         ]);
-
-        $order->status = $request->status;
-
-        $order->nomor_resi = $request->nomor_resi;
-
-        $order->save();
-
+    
+        if ($request->status == 'dibatalkan' && $order->status != 'dibatalkan') {
+            \DB::transaction(function () use ($order, $request) {
+                foreach ($order->items as $item) {
+                    if ($item->product) {
+                        $item->product->increment('stok', $item->kuantitas);
+                    }
+                }
+                $order->status = $request->status;
+                $order->nomor_resi = $request->nomor_resi;
+                $order->save();
+            });
+        } else {
+            $order->status = $request->status;
+            $order->nomor_resi = $request->nomor_resi;
+            $order->save();
+        }
+    
         return redirect()->route('admin.orders.show', $order->id)
-                        ->with('success', 'Status pesanan berhasil diperbarui.');
+                         ->with('success', 'Status pesanan berhasil diperbarui.');
     }
 
     public function rejectPayment(Request $request, Order $order)
@@ -75,6 +86,26 @@ class OrderController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Pembayaran ditolak. Notifikasi dikirim ke customer.');
+    }
+    
+    public function cancelByAdmin($id)
+    {
+        $order = Order::findOrFail($id);
+    
+        if ($order->status == 'menunggu_pembayaran' || $order->status == 'diproses') {
+            
+            DB::transaction(function () use ($order) {
+                foreach ($order->items as $item) {
+                    $item->product->increment('stok', $item->kuantitas);
+                }
+    
+                $order->update(['status' => 'dibatalkan']);
+            });
+    
+            return redirect()->back()->with('success', 'Pesanan dibatalkan dan stok telah dikembalikan.');
+        }
+    
+        return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
     }
     
 }

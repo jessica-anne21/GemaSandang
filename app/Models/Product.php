@@ -28,9 +28,9 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function orderItem() 
+    public function orderItems() 
     {
-        return $this->hasOne(OrderItem::class); 
+        return $this->hasMany(OrderItem::class); 
     }
 
     public function bargains()

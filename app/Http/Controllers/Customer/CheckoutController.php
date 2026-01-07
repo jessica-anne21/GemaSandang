@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Storage; 
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -111,15 +112,27 @@ class CheckoutController extends Controller
         return view('customer.checkout.success', compact('order'));
     }
 
+    /**
+     * Update: Upload bukti pembayaran langsung ke folder publik
+     */
     public function uploadProof(Request $request, $orderId)
     {
         $request->validate([
             'bukti_bayar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'bukti_bayar.required' => 'Waduh, bukti bayarnya jangan lupa diupload ya!',
+            'bukti_bayar.image'    => 'Format gambar harus jpeg, png, atau jpg.',
+            'bukti_bayar.max'      => 'Ukuran foto terlalu besar, maksimal 2MB ya.',
         ]);
 
         $order = Order::where('id', $orderId)->where('user_id', Auth::id())->firstOrFail();
 
         if ($request->hasFile('bukti_bayar')) {
+            if ($order->bukti_bayar) {
+                Storage::disk('public')->delete($order->bukti_bayar);
+            }
+
+            // Simpan file baru ke folder public/payment_proofs
             $path = $request->file('bukti_bayar')->store('payment_proofs', 'public');
             
             $order->update([

@@ -44,7 +44,7 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset('storage/' . $details['photo']) }}" width="80" class="rounded shadow-sm me-3" alt="{{ $details['name'] }}">
+                                    <img src="{{ asset($details['photo']) }}" width="80" class="rounded shadow-sm me-3" alt="{{ $details['name'] }}">
                                     <div>
                                         <h6 class="mb-0 fw-bold">{{ $details['name'] }}</h6>
                                         @if(!empty($details['is_bargain']))

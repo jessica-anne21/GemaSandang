@@ -90,7 +90,15 @@
                                         @csrf
                                         <div class="mb-4 text-center p-4 border border-dashed rounded bg-light">
                                             <i class="bi bi-cloud-upload display-4 text-muted mb-2"></i>
-                                            <input type="file" name="bukti_bayar" class="form-control" required>
+                                            
+                                            <input type="file" name="bukti_bayar" 
+                                                class="form-control @error('bukti_bayar') is-invalid @enderror" required>
+
+                                            @error('bukti_bayar')
+                                                <div class="text-danger mt-2 small text-start">
+                                                    <strong>Gagal:</strong> {{ $message }}
+                                                </div>
+                                            @enderror
                                         </div>
                                         <button type="submit" class="btn btn-custom w-100 py-2">Kirim Bukti</button>
                                     </form>

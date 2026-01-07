@@ -27,7 +27,7 @@
     <div class="row">
         <div class="col-lg-6 mb-4">
             <div class="card border-0 shadow-sm" style="border-radius: 0.75rem;">
-                <img src="{{ asset('storage/' . $product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="border-radius: 0.75rem;">
+                <img src="{{ asset($product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="border-radius: 0.75rem;">
             </div>
         </div>
 

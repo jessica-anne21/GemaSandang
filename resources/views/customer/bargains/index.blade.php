@@ -30,7 +30,7 @@
                                 <td class="p-3 ps-4">
                                     <div class="d-flex align-items-center">
                                         @if($bargain->product && $bargain->product->foto_produk)
-                                            <img src="{{ asset('storage/' . $bargain->product->foto_produk) }}" 
+                                            <img src="{{ asset($bargain->product->foto_produk) }}" 
                                                  alt="Produk" 
                                                  class="rounded me-3" 
                                                  style="width: 50px; height: 50px; object-fit: cover;">

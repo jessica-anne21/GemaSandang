@@ -22,7 +22,7 @@
                     </div>
                     <h3 class="card-title fw-bold mb-3">Instagram</h3>
                     <p class="text-muted mb-4">
-                        Ikuti <strong>@gemasandang</strong> untuk update katalog terbaru dan inspirasi OOTD.
+                        Ikuti <strong>@gemasandang</strong> untuk update katalog terbaru.
                     </p>
                     
                     <a href="https://www.instagram.com/gemasandang/" target="_blank" class="btn btn-outline-danger btn-lg w-100 rounded-pill">

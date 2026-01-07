@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container-fluid">
-    <h1 class="h3 mb-4 text-gray-800" style="font-family: 'Playfair Display', serif; color: #800000;">Daftar Negosiasi Harga</h1>
+    <h1 class="h3 mb-4 text-gray-800" style="font-family: 'Playfair Display', serif; color: #800000;">Kelola Tawaran</h1>
 
     @if(session('success'))
         <div class="alert alert-success shadow-sm border-0">{{ session('success') }}</div>
@@ -13,6 +13,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-muted small text-uppercase">
                     <tr>
+                        <th class="p-3 ps-4">ID Produk</th>
                         <th class="p-3 ps-4">Produk</th>
                         <th class="p-3">Pelanggan</th>
                         <th class="p-3">Stok</th> 
@@ -26,12 +27,13 @@
                     @forelse ($bargains as $bargain)
                         <tr>
                             <td class="p-3 ps-4">
+                                <div class="fw-bold">#{{ $bargain->product->id }}</div>
+                            </td>
+                            <td class="p-3 ps-4">
                                 <div class="fw-bold">{{ $bargain->product->nama_produk }}</div>
-                                <small class="text-muted">ID: #{{ $bargain->product->id }}</small>
                             </td>
                             <td class="p-3">
                                 <div class="small fw-bold">{{ $bargain->user->name }}</div>
-                                <div class="small text-muted">{{ $bargain->user->email }}</div>
                             </td>
 
                             {{-- DATA STOK --}}
@@ -109,10 +111,10 @@
                                                         <input type="hidden" name="status" value="rejected"> 
                                                         
                                                         <div class="modal-body text-start">
-                                                            <p class="small text-muted">Tindakan ini akan membatalkan status "Diterima" milik <strong>{{ $bargain->user->name }}</strong>.</p>
+                                                            <p class="small text-muted">Tindakan ini akan membatalkan status tawaran "Diterima" milik <strong>{{ $bargain->user->name }}</strong>.</p>
                                                             <div class="mb-3">
                                                                 <label class="form-label fw-bold small">Alasan Pembatalan:</label>
-                                                                <textarea class="form-control" name="catatan_admin" rows="2" required>Maaf, kesepakatan dibatalkan karena melebihi batas waktu pembayaran.</textarea>
+                                                                <textarea class="form-control" name="catatan_admin" rows="2" required></textarea>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer py-1">

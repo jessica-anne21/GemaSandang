@@ -114,7 +114,7 @@
                             
                             <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset('storage/' . $details['photo']) }}" class="rounded border" width="60" height="60" style="object-fit: cover;">                                    <div class="ms-3">
+                                    <img src="{{ asset($details['photo']) }}" class="rounded border" width="60" height="60" style="object-fit: cover;">                                    <div class="ms-3">
                                         <h6 class="mb-0 text-truncate" style="max-width: 150px;">{{ $details['name'] }}</h6>
                                         <small class="text-muted">@ Rp {{ number_format($details['price'], 0, ',', '.') }}</small>
                                     </div>

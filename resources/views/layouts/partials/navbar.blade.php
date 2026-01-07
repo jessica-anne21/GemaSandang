@@ -57,6 +57,12 @@
               </a>
               
               <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="navbarDropdown">
+                <li>
+                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                         Profil Saya
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
 
                 <li>
                     <a class="dropdown-item d-flex justify-content-between align-items-center"
