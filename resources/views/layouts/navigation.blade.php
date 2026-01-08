@@ -19,7 +19,6 @@
                         </a>
                     </li>
                 @endforeach
-
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <a class="dropdown-item" href="{{ route('shop') }}">Lihat Semua Produk</a>
@@ -28,22 +27,27 @@
         </li>
         <li class="nav-item"><a class="nav-link" href="{{ route('about') }}">Tentang</a></li>
         <li class="nav-item">
-        <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Kontak</a>
-      </li>
+            <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Kontak</a>
+        </li>
       </ul>
 
       <div class="d-flex align-items-center">
-        <a href="{{ route('cart.index') }}" class="nav-link position-relative">
+        {{-- BAGIAN KERANJANG - SUDAH FIX DATABASE --}}
+        <a href="{{ route('cart.index') }}" class="nav-link position-relative me-3">
             <i class="bi bi-cart fs-4"></i>
-            {{-- Badge Angka Keranjang --}}
-            @if(count(session('cart', [])) > 0)
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
-                    {{ count(session('cart')) }}
-                    <span class="visually-hidden">produk di keranjang</span>
-                </span>
-            @endif
+            @auth
+                @php
+                    $cartCount = \App\Models\Cart::where('user_id', auth()->id())->count();
+                @endphp
+                @if($cartCount > 0)
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.7rem;">
+                        {{ $cartCount }}
+                        <span class="visually-hidden">produk di keranjang</span>
+                    </span>
+                @endif
+            @endauth
         </a> 
-               
+                
         @auth
             <div class="nav-item dropdown position-relative">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -58,44 +62,30 @@
               
               <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" aria-labelledby="navbarDropdown">
                 <li>
-                    <a class="dropdown-item" href="{{ route('profile.edit') }}">
-                         Profil Saya
-                    </a>
+                    <a class="dropdown-item" href="{{ route('profile.edit') }}">Profil Saya</a>
                 </li>
                 <li><hr class="dropdown-divider"></li>
-
                 <li>
-                    <a class="dropdown-item d-flex justify-content-between align-items-center"
-                       href="{{ route('customer.bargains.index') }}">
+                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('customer.bargains.index') }}">
                         Riwayat Tawaran
-
                         @if(isset($badgeBargains) && $badgeBargains > 0)
-                            <span class="badge bg-danger rounded-pill ms-2">
-                                {{ $badgeBargains }}
-                            </span>
+                            <span class="badge bg-danger rounded-pill ms-2">{{ $badgeBargains }}</span>
                         @endif
                     </a>
                 </li>
-
                 <li>
                     <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('orders.index') }}">
                         Riwayat Pesanan
-                        
                         @if(isset($badgeOrders) && $badgeOrders > 0)
-                            <span class="badge bg-danger rounded-pill ms-2">
-                                {{ $badgeOrders }}
-                            </span>
+                            <span class="badge bg-danger rounded-pill ms-2">{{ $badgeOrders }}</span>
                         @endif
                     </a>
                 </li>
-
                 <li><hr class="dropdown-divider"></li>
-
                 <li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <a class="dropdown-item" href="{{ route('logout') }}"
-                                onclick="event.preventDefault(); this.closest('form').submit();">
+                        <a class="dropdown-item" href="{{ route('logout') }}" onclick="event.preventDefault(); this.closest('form').submit();">
                             Keluar
                         </a>
                     </form>

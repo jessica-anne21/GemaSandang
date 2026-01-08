@@ -10,21 +10,23 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Cart;
 
 class CheckoutController extends Controller
 {
     public function index()
     {
-        $cart = session()->get('cart');
-        if (!$cart || count($cart) == 0) {
+        $cartItems = Cart::with('product')->where('user_id', auth()->id())->get();
+
+        if ($cartItems->isEmpty()) {
             return redirect()->route('shop')->with('error', 'Keranjang Anda kosong.');
         }
-        return view('customer.checkout.index', compact('cart'));
+
+        return view('customer.checkout.index', compact('cartItems'));
     }
 
     public function store(Request $request)
     {        
-        // 1. Validasi Input
         $request->validate([
             'alamat_pengiriman' => 'required|string|max:500',
             'kurir' => 'required|string',
@@ -33,9 +35,9 @@ class CheckoutController extends Controller
             'catatan_customer' => 'nullable|string|max:1000', 
         ]);
 
-        $cart = session()->get('cart');
+        $cartItems = Cart::where('user_id', auth()->id())->get();
         
-        if (!$cart) {
+        if ($cartItems->isEmpty()) {
             return redirect()->route('shop');
         }
 
@@ -50,14 +52,12 @@ class CheckoutController extends Controller
         DB::beginTransaction();
 
         try {
-            // 2. Hitung Total 
             $subtotal = 0;
-            foreach ($cart as $details) {
-                $subtotal += $details['price'] * $details['quantity'];
+            foreach ($cartItems as $item) {
+                $subtotal += $item->price * $item->quantity;
             }
             $grandTotal = $subtotal + $request->ongkir;
 
-            // 3. Buat Order
             $order = Order::create([
                 'user_id' => Auth::id(),
                 'total_harga' => $grandTotal,
@@ -69,35 +69,29 @@ class CheckoutController extends Controller
                 'catatan_customer' => $request->catatan_customer, 
             ]);
 
-            // 4. Loop Barang & Kurangi Stok
-            foreach ($cart as $id => $details) {
-                // Lock produk agar aman dari rebutan stok (Race Condition)
-                $product = Product::lockForUpdate()->find($id); 
+            foreach ($cartItems as $item) {
+                $product = Product::lockForUpdate()->find($item->product_id); 
 
-                // Cek ketersediaan stok
-                if (!$product || $product->stok < $details['quantity']) {
+                if (!$product || $product->stok < $item->quantity) {
                     DB::rollBack();
                     return redirect()->route('cart.index')
-                        ->with('error', 'Maaf, produk "' . $details['name'] . '" baru saja habis terjual atau stok tidak cukup.');
+                        ->with('error', 'Maaf, produk "' . ($product ? $product->nama_produk : 'Unknown') . '" baru saja habis terjual.');
                 }
 
-                // Simpan ke OrderItem
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $id,
-                    'kuantitas' => $details['quantity'],
-                    'harga_saat_beli' => $details['price'], 
+                    'product_id' => $item->product_id,
+                    'kuantitas' => $item->quantity,
+                    'harga_saat_beli' => $item->price, 
                 ]);
 
-                // Kurangi Stok
-                $product->decrement('stok', $details['quantity']);
+                $product->decrement('stok', $item->quantity);
             }
+
+            Cart::where('user_id', auth()->id())->delete();
 
             DB::commit();
             
-            // Hapus Keranjang setelah sukses
-            session()->forget('cart');
-
             return redirect()->route('checkout.success', $order->id);
 
         } catch (\Exception $e) {
@@ -112,9 +106,6 @@ class CheckoutController extends Controller
         return view('customer.checkout.success', compact('order'));
     }
 
-    /**
-     * Update: Upload bukti pembayaran langsung ke folder publik
-     */
     public function uploadProof(Request $request, $orderId)
     {
         $request->validate([
@@ -132,7 +123,6 @@ class CheckoutController extends Controller
                 Storage::disk('public')->delete($order->bukti_bayar);
             }
 
-            // Simpan file baru ke folder public/payment_proofs
             $path = $request->file('bukti_bayar')->store('payment_proofs', 'public');
             
             $order->update([

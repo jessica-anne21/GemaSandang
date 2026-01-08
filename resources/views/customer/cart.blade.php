@@ -25,7 +25,7 @@
         </div>
     @endif
 
-    @if(!empty($cart))
+    @if($cartItems->count() > 0)
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead class="table-light">
@@ -39,29 +39,32 @@
                 </thead>
                 <tbody>
                     @php $total = 0; @endphp
-                    @foreach($cart as $id => $details)
-                        @php $total += $details['price'] * $details['quantity']; @endphp
+                    @foreach($cartItems as $item)
+                        @php 
+                            $subtotal = $item->price * $item->quantity;
+                            $total += $subtotal;
+                        @endphp
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset($details['photo']) }}" width="80" class="rounded shadow-sm me-3" alt="{{ $details['name'] }}">
+                                    <img src="{{ asset('storage/' . $item->product->foto_produk) }}" width="80" class="rounded shadow-sm me-3" alt="{{ $item->product->nama_produk }}">
                                     <div>
-                                        <h6 class="mb-0 fw-bold">{{ $details['name'] }}</h6>
-                                        @if(!empty($details['is_bargain']))
+                                        <h6 class="mb-0 fw-bold">{{ $item->product->nama_produk }}</h6>
+                                        @if($item->is_bargain)
                                             <span class="badge bg-success small">Harga Negosiasi</span>
                                         @endif
                                     </div>
                                 </div>
                             </td>
-                            <td>Rp {{ number_format($details['price'], 0, ',', '.') }}</td>
+                            <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                             <td>
-                                <input type="number" value="{{ $details['quantity'] }}" class="form-control form-control-sm text-center" readonly style="width: 50px;">
+                                <input type="number" value="{{ $item->quantity }}" class="form-control form-control-sm text-center" readonly style="width: 50px;">
                             </td>
                             <td class="text-end fw-bold">
-                                Rp {{ number_format($details['price'] * $details['quantity'], 0, ',', '.') }}
+                                Rp {{ number_format($subtotal, 0, ',', '.') }}
                             </td>
                             <td class="text-center">
-                                <form action="{{ route('cart.remove', $id) }}" method="POST" onsubmit="return confirm('Hapus produk ini dari keranjang?');">
+                                <form action="{{ route('cart.remove', $item->id) }}" method="POST" onsubmit="return confirm('Hapus produk ini dari keranjang?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger border-0">
@@ -85,7 +88,7 @@
                             </a>
                             <a href="{{ route('checkout.index') }}" class="btn btn-dark px-4">
                                 Checkout <i class="bi bi-arrow-right"></i>
-                            </a>                   
+                            </a>                    
                         </td>
                     </tr>
                 </tfoot>

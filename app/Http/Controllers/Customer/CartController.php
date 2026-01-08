@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product; 
 use App\Models\Bargain;
+use App\Models\Cart; // WAJIB TAMBAH INI SIS!
 
 class CartController extends Controller
 {
@@ -14,28 +15,28 @@ class CartController extends Controller
      */
     public function index()
     {
-        $cart = session()->get('cart', []);
+        // Ambil data dari tabel carts berdasarkan user yang login
+        $cartItems = Cart::with('product')
+            ->where('user_id', auth()->id())
+            ->get();
+
         $removedItems = [];
 
-        foreach ($cart as $id => $details) {
-            $product = Product::find($id);
-            
-            if (!$product || $product->stok < 1) {
-                $removedItems[] = $details['name']; 
-                unset($cart[$id]); 
+        foreach ($cartItems as $item) {
+            // Cek apakah produknya masih ada atau stoknya habis (dibeli orang lain)
+            if (!$item->product || $item->product->stok < 1) {
+                $removedItems[] = $item->product ? $item->product->nama_produk : 'Produk Tidak Diketahui'; 
+                $item->delete(); // Hapus otomatis dari tabel carts
             }
         }
 
         if (!empty($removedItems)) {
-            session()->put('cart', $cart);
             $namaProduk = implode(', ', $removedItems);
-            
             session()->flash('warning', "Maaf, produk ($namaProduk) baru saja di-checkout pelanggan lain. Stok thrift kami terbatas 1 pcs per item.");
-            
             return redirect()->route('cart.index'); 
         }
 
-        return view('customer.cart', compact('cart')); 
+        return view('customer.cart', compact('cartItems')); 
     }
     
     /**
@@ -48,31 +49,30 @@ class CartController extends Controller
         ]);
 
         $product = Product::findOrFail($request->product_id);
-        $cart = session()->get('cart', []);
+        
+        // Cek apakah produk ini SUDAH ADA di keranjang user ini
+        $existingCart = Cart::where('user_id', auth()->id())
+            ->where('product_id', $product->id)
+            ->first();
 
-        // Cek apakah produk sudah ada di keranjang
-        if (isset($cart[$product->id])) {
-            // Cek stok
-            if ($cart[$product->id]['quantity'] >= $product->stok) {
-                return redirect()->back()->with('warning', 'Stok produk "' . $product->nama_produk . '" mentok, tidak bisa tambah lagi.');
-            }
-            $cart[$product->id]['quantity']++;
-        } else {
-            // Cek stok awal
-            if ($product->stok < 1) {
-                return redirect()->back()->with('error', 'Maaf, stok produk habis.');
-            }
-            
-            // Simpan pakai Product ID sebagai Key
-            $cart[$product->id] = [
-                "name" => $product->nama_produk,
-                "quantity" => 1,
-                "price" => $product->harga,
-                "photo" => $product->foto_produk,
-            ];
+        if ($existingCart) {
+            return redirect()->back()->with('warning', 'Produk "' . $product->nama_produk . '" sudah ada di keranjang kamu.');
         }
 
-        session()->put('cart', $cart);
+        // Cek stok awal
+        if ($product->stok < 1) {
+            return redirect()->back()->with('error', 'Maaf, stok produk habis.');
+        }
+        
+        // SIMPAN KE TABEL CARTS
+        Cart::create([
+            'user_id'    => auth()->id(),
+            'product_id' => $product->id,
+            'kuantitas'   => 1,
+            'harga'      => $product->harga, // Pakai Float sesuai DB kamu
+            'is_bargain' => false,
+        ]);
+
         return redirect()->back()->with('success', 'Produk berhasil ditambahkan ke keranjang!');
     }
 
@@ -87,22 +87,29 @@ class CartController extends Controller
             ->where('status', 'accepted')
             ->firstOrFail();
 
-        $cart = session()->get('cart', []);
+        // Cek apakah hasil nego ini sudah dimasukkan ke keranjang sebelumnya
+        $existingCart = Cart::where('user_id', auth()->id())
+            ->where('product_id', $bargain->product_id)
+            ->first();
 
-        // Gunakan ID Produk sebagai Key agar kompatibel dengan sistem checkout
-        $cartKey = $bargain->product->id; 
-
-        // Isi cart dengan data bargain
-        $cart[$cartKey] = [
-            'name' => $bargain->product->nama_produk,
-            'quantity' => 1,
-            'price' => $bargain->harga_tawaran, 
-            'photo' => $bargain->product->foto_produk,
-            'is_bargain' => true, 
-            'bargain_id' => $bargain->id,
-        ];
-
-        session()->put('cart', $cart);
+        if ($existingCart) {
+            // Jika sudah ada, kita update harganya jadi harga nego
+            $existingCart->update([
+                'harga'      => $bargain->harga_tawaran,
+                'is_bargain' => true,
+                'bargain_id' => $bargain->id
+            ]);
+        } else {
+            // Jika belum ada, buat baru di tabel carts
+            Cart::create([
+                'user_id'    => auth()->id(),
+                'product_id' => $bargain->product_id,
+                'kuantitas'   => 1,
+                'harga'      => $bargain->harga_tawaran, 
+                'is_bargain' => true, 
+                'bargain_id' => $bargain->id,
+            ]);
+        }
 
         return redirect()->route('cart.index')
             ->with('success', 'Produk hasil tawar berhasil dimasukkan ke keranjang dengan harga spesial!');
@@ -113,11 +120,11 @@ class CartController extends Controller
      */
     public function remove($id)
     {
-        $cart = session()->get('cart', []);
+        // Cari di tabel carts berdasarkan ID baris keranjangnya
+        $cartItem = Cart::where('user_id', auth()->id())->where('id', $id)->first();
 
-        if(isset($cart[$id])) {
-            unset($cart[$id]);
-            session()->put('cart', $cart);
+        if($cartItem) {
+            $cartItem->delete();
         }
 
         return redirect()->route('cart.index')->with('success', 'Produk berhasil dihapus dari keranjang.');

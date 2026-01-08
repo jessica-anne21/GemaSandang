@@ -4,7 +4,7 @@
 <div class="container my-5 py-5">
     
     @php
-        $limitInMinutes = 24 * 60; // 24 Jam
+        $limitInMinutes = 24 * 60; 
         $expiryTime = $order->created_at->addMinutes($limitInMinutes);
         $remainingSeconds = now()->diffInSeconds($expiryTime, false);
     @endphp
@@ -71,7 +71,7 @@
                                         </div>
                                         <div class="text-end">
                                             <h5 class="mb-0 fw-bold text-dark">123-456-7890</h5>
-                                            <small class="text-primary" style="cursor: pointer;" onclick="navigator.clipboard.writeText('1234567890'); alert('Tersalin!');">Salin</small>
+                                            <small class="text-primary" style="cursor: pointer;" onclick="navigator.clipboard.writeText('1234567890'); alert('Nomor rekening berhasil disalin!');">Salin</small>
                                         </div>
                                     </div>
                                     <div class="alert alert-warning mb-0">
@@ -90,17 +90,14 @@
                                         @csrf
                                         <div class="mb-4 text-center p-4 border border-dashed rounded bg-light">
                                             <i class="bi bi-cloud-upload display-4 text-muted mb-2"></i>
-                                            
-                                            <input type="file" name="bukti_bayar" 
-                                                class="form-control @error('bukti_bayar') is-invalid @enderror" required>
-
+                                            <input type="file" name="bukti_bayar" class="form-control @error('bukti_bayar') is-invalid @enderror" required>
                                             @error('bukti_bayar')
-                                                <div class="text-danger mt-2 small text-start">
-                                                    <strong>Gagal:</strong> {{ $message }}
+                                                <div class="invalid-feedback text-start">
+                                                    {{ $message }}
                                                 </div>
                                             @enderror
                                         </div>
-                                        <button type="submit" class="btn btn-custom w-100 py-2">Kirim Bukti</button>
+                                        <button type="submit" class="btn btn-custom w-100 py-2">Kirim Bukti Pembayaran</button>
                                     </form>
                                 </div>
                             </div>
@@ -115,9 +112,12 @@
             <div class="col-lg-6 text-center">
                 <div class="card border-0 shadow-sm p-5">
                     <div class="mb-3"><i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i></div>
-                    <h2 class="mb-3" style="font-family: 'Playfair Display', serif;">Bukti Diterima!</h2>
-                    <p class="text-muted mb-4">Kami sedang memverifikasi pembayaran Anda.</p>
-                    <a href="{{ route('orders.index') }}" class="btn btn-custom px-4">Lihat Pesanan</a>
+                    <h2 class="mb-3" style="font-family: 'Playfair Display', serif;">Bukti Terkirim!</h2>
+                    <p class="text-muted mb-4">Pembayaran Anda sedang dalam proses verifikasi oleh tim Gema Sandang.</p>
+                    <div class="d-grid gap-2 d-md-block">
+                        <a href="{{ route('orders.index') }}" class="btn btn-custom px-4 me-md-2">Riwayat Pesanan</a>
+                        <a href="{{ route('shop') }}" class="btn btn-outline-dark px-4">Belanja Lagi</a>
+                    </div>
                 </div>
             </div>
         </div>

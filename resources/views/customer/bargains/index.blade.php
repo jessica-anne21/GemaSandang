@@ -30,7 +30,7 @@
                                 <td class="p-3 ps-4">
                                     <div class="d-flex align-items-center">
                                         @if($bargain->product && $bargain->product->foto_produk)
-                                            <img src="{{ asset($bargain->product->foto_produk) }}" 
+                                            <img src="{{ asset('storage/' . $bargain->product->foto_produk) }}" 
                                                  alt="Produk" 
                                                  class="rounded me-3" 
                                                  style="width: 50px; height: 50px; object-fit: cover;">
@@ -86,10 +86,7 @@
                                 <td class="p-3 text-center">
                                     @if($bargain->status === 'accepted')
                                         @php
-                                            // 1. Cek Stok Produk
                                             $stokHabis = $bargain->product && $bargain->product->stok < 1;
-                                            
-                                            // 2. Cek Keranjang (Apakah produk ini sudah ada di session cart)
                                             $cart = session('cart', []);
                                             $isInCart = isset($bargain->product) && array_key_exists($bargain->product->id, $cart);
                                         @endphp
@@ -113,7 +110,6 @@
                                         @endif
 
                                     @elseif($bargain->status === 'rejected')
-                                        
                                         @php
                                             $stokHabis = $bargain->product && $bargain->product->stok < 1;
                                         @endphp
@@ -128,7 +124,6 @@
                                                 <i class="bi bi-arrow-repeat"></i> Tawar Ulang
                                             </a>
                                         @endif
-
                                     @else
                                         <button class="btn btn-sm btn-secondary w-100" disabled>
                                             Menunggu

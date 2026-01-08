@@ -71,12 +71,11 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="{{ asset($item->product->foto_produk) }}" 
+                                            <img src="{{ asset('storage/' . $item->product->foto_produk) }}" 
                                                  class="rounded border me-3 shadow-sm" 
                                                  style="width: 60px; height: 60px; object-fit: cover;"
                                                  onerror="this.src='{{ asset('images/default.jpg') }}'">
                                             <div>
-                                                <div class="fw-bold small">{{ $item->product->nama_produk ?? 'Produk Dihapus' }}</div>
                                                 <div class="fw-bold small">{{ $item->product->nama_produk ?? 'Produk Dihapus' }}</div>
                                                 <small class="text-muted">{{ $item->product->category->nama_kategori ?? '-' }}</small>
                                                 @if($item->harga_saat_beli < ($item->product->harga ?? 0))

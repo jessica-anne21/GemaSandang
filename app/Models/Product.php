@@ -38,4 +38,10 @@ class Product extends Model
         // Satu produk bisa memiliki banyak tawaran
         return $this->hasMany(Bargain::class);
     }
+
+    public function carts()
+    {
+        // Satu produk bisa ada di banyak keranjang user (sebelum dicheckout)
+        return $this->hasMany(Cart::class);
+    }
 }

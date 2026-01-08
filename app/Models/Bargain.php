@@ -26,4 +26,9 @@ class Bargain extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function cart()
+    {
+        return $this->hasOne(Cart::class);
+    }
 }
