@@ -54,7 +54,7 @@ class CheckoutController extends Controller
         try {
             $subtotal = 0;
             foreach ($cartItems as $item) {
-                $subtotal += $item->price * $item->quantity;
+                $subtotal += $item->harga * $item->kuantitas;
             }
             $grandTotal = $subtotal + $request->ongkir;
 
@@ -72,7 +72,7 @@ class CheckoutController extends Controller
             foreach ($cartItems as $item) {
                 $product = Product::lockForUpdate()->find($item->product_id); 
 
-                if (!$product || $product->stok < $item->quantity) {
+                if (!$product || $product->stok < $item->kuantitas) {
                     DB::rollBack();
                     return redirect()->route('cart.index')
                         ->with('error', 'Maaf, produk "' . ($product ? $product->nama_produk : 'Unknown') . '" baru saja habis terjual.');
@@ -81,11 +81,11 @@ class CheckoutController extends Controller
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
-                    'kuantitas' => $item->quantity,
-                    'harga_saat_beli' => $item->price, 
+                    'kuantitas' => $item->kuantitas,
+                    'harga_saat_beli' => $item->harga, 
                 ]);
 
-                $product->decrement('stok', $item->quantity);
+                $product->decrement('stok', $item->kuantitas);
             }
 
             Cart::where('user_id', auth()->id())->delete();

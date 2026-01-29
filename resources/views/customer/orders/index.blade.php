@@ -33,7 +33,7 @@
                                         @endphp
                                         
                                         @if($firstItem && $firstItem->product && $firstItem->product->foto_produk)
-                                            <img src="{{ asset('storage/' . $firstItem->product->foto_produk) }}" 
+                                            <img src="{{ asset($firstItem->product->foto_produk) }}" 
                                                  alt="Produk" 
                                                  class="rounded me-3 shadow-sm border" 
                                                  style="width: 50px; height: 50px; object-fit: cover;"

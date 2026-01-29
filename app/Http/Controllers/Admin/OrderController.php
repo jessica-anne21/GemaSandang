@@ -5,20 +5,17 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
-    /**
-     * Menampilkan daftar semua pesanan dengan opsi filter tanggal.
-     */
     public function index(Request $request)
     {
         $query = Order::with('user')->latest();
 
-        if ($request->has('date')) {
-            $date = $request->date;
-            $query->whereDate('created_at', $date);
-        
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
         }
 
         $orders = $query->paginate(10); 
@@ -26,42 +23,47 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders'));
     }
 
-    /**
-     * Menampilkan detail satu pesanan.
-     */
     public function show($id)
     {
-        $order = Order::with(['user', 'items.product'])->findOrFail($id);
+        $order = Order::with(['user', 'items.product.category'])->findOrFail($id);
         return view('admin.orders.show', compact('order'));
     }
 
-    /**
-     * Mengupdate status pesanan dan nomor resi.
-     */
     public function update(Request $request, $id)
     {
+        // Ambil data beserta relasi items dan product untuk keperluan stok
         $order = Order::with('items.product')->findOrFail($id); 
     
         $request->validate([
             'status' => 'required|in:menunggu_pembayaran,menunggu_konfirmasi,diproses,dikirim,selesai,dibatalkan',
             'nomor_resi' => 'nullable|string|max:255',
         ]);
+        
+        if ($request->status == 'selesai' && $order->status != 'dikirim') {
+            return back()->with('warning', 'Status hanya bisa diselesaikan jika barang sudah dikirim (sudah ada nomor resi).');
+        }
+
+        if ($request->status == 'dikirim' && empty($request->nomor_resi)) {
+            return back()->with('warning', 'Nomor resi wajib diisi jika status pesanan diubah menjadi DIKIRIM.');
+        }
     
         if ($request->status == 'dibatalkan' && $order->status != 'dibatalkan') {
-            \DB::transaction(function () use ($order, $request) {
+            DB::transaction(function () use ($order, $request) {
                 foreach ($order->items as $item) {
                     if ($item->product) {
                         $item->product->increment('stok', $item->kuantitas);
                     }
                 }
-                $order->status = $request->status;
-                $order->nomor_resi = $request->nomor_resi;
-                $order->save();
+                $order->update([
+                    'status' => $request->status,
+                    'nomor_resi' => $request->nomor_resi
+                ]);
             });
         } else {
-            $order->status = $request->status;
-            $order->nomor_resi = $request->nomor_resi;
-            $order->save();
+            $order->update([
+                'status' => $request->status,
+                'nomor_resi' => $request->nomor_resi
+            ]);
         }
     
         return redirect()->route('admin.orders.show', $order->id)
@@ -74,9 +76,8 @@ class OrderController extends Controller
             'catatan_admin' => 'required|string|max:255'
         ]);
 
-        // Hapus bukti bayar lama dari storage untuk hemat memori
         if ($order->bukti_bayar) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($order->bukti_bayar);
+            Storage::disk('public')->delete($order->bukti_bayar);
         }
 
         $order->update([
@@ -85,20 +86,20 @@ class OrderController extends Controller
             'catatan_admin' => $request->catatan_admin 
         ]);
 
-        return redirect()->back()->with('success', 'Pembayaran ditolak. Notifikasi dikirim ke customer.');
+        return redirect()->back()->with('success', 'Pembayaran ditolak. Customer diminta upload ulang.');
     }
     
     public function cancelByAdmin($id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with('items.product')->findOrFail($id);
     
-        if ($order->status == 'menunggu_pembayaran' || $order->status == 'diproses') {
-            
+        if (in_array($order->status, ['menunggu_pembayaran', 'diproses'])) {
             DB::transaction(function () use ($order) {
                 foreach ($order->items as $item) {
-                    $item->product->increment('stok', $item->kuantitas);
+                    if ($item->product) {
+                        $item->product->increment('stok', $item->kuantitas);
+                    }
                 }
-    
                 $order->update(['status' => 'dibatalkan']);
             });
     
@@ -107,5 +108,4 @@ class OrderController extends Controller
     
         return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan.');
     }
-    
 }

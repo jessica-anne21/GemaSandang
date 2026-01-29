@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Product; 
 use App\Models\Bargain;
-use App\Models\Cart; // WAJIB TAMBAH INI SIS!
+use App\Models\Cart; 
 
 class CartController extends Controller
 {
@@ -50,7 +50,6 @@ class CartController extends Controller
 
         $product = Product::findOrFail($request->product_id);
         
-        // Cek apakah produk ini SUDAH ADA di keranjang user ini
         $existingCart = Cart::where('user_id', auth()->id())
             ->where('product_id', $product->id)
             ->first();
@@ -64,12 +63,12 @@ class CartController extends Controller
             return redirect()->back()->with('error', 'Maaf, stok produk habis.');
         }
         
-        // SIMPAN KE TABEL CARTS
+        // Simpan ke tabel carts
         Cart::create([
             'user_id'    => auth()->id(),
             'product_id' => $product->id,
             'kuantitas'   => 1,
-            'harga'      => $product->harga, // Pakai Float sesuai DB kamu
+            'harga'      => $product->harga, 
             'is_bargain' => false,
         ]);
 
@@ -93,7 +92,7 @@ class CartController extends Controller
             ->first();
 
         if ($existingCart) {
-            // Jika sudah ada, kita update harganya jadi harga nego
+            // Jika sudah ada, update harganya jadi harga nego
             $existingCart->update([
                 'harga'      => $bargain->harga_tawaran,
                 'is_bargain' => true,

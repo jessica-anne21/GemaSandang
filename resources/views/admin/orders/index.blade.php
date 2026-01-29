@@ -18,7 +18,7 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-muted small text-uppercase">
                     <tr>
-                        <th class="p-3 ps-4 border-0">ID</th>
+                        <th class="p-3 ps-4 border-0">ID Pesanan</th>
                         <th class="p-3 border-0">Produk</th>
                         <th class="p-3 border-0">Pelanggan</th>
                         <th class="p-3 border-0">Total Harga</th>

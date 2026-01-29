@@ -1,9 +1,10 @@
 @extends('layouts.main')
-@section('content')
 
+@section('content')
 <div class="container my-5">
     <h1 class="display-5 mb-4" style="font-family: 'Playfair Display', serif;">Keranjang Belanja Anda</h1>
 
+    {{-- Notifikasi Sukses --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 12px;">
             <i class="bi bi-check-circle-fill me-2"></i>
@@ -12,6 +13,7 @@
         </div>
     @endif
 
+    {{-- Notifikasi Peringatan --}}
     @if(session('warning'))
         <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm mb-4" role="alert" style="border-radius: 12px; background-color: #fff3cd; color: #856404;">
             <div class="d-flex align-items-center">
@@ -41,24 +43,25 @@
                     @php $total = 0; @endphp
                     @foreach($cartItems as $item)
                         @php 
-                            $subtotal = $item->price * $item->quantity;
+                            $subtotal = $item->harga * $item->kuantitas;
                             $total += $subtotal;
                         @endphp
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset('storage/' . $item->product->foto_produk) }}" width="80" class="rounded shadow-sm me-3" alt="{{ $item->product->nama_produk }}">
+                                    {{-- Menggunakan path langsung dari database --}}
+                                    <img src="{{ asset($item->product->foto_produk) }}" width="80" height="80" class="rounded shadow-sm me-3" style="object-fit: cover;" alt="{{ $item->product->nama_produk }}" onerror="this.src='{{ asset('products/default.jpg') }}'">
                                     <div>
                                         <h6 class="mb-0 fw-bold">{{ $item->product->nama_produk }}</h6>
                                         @if($item->is_bargain)
-                                            <span class="badge bg-success small">Harga Negosiasi</span>
+                                            <span class="badge bg-success small" style="font-size: 0.7rem;">Harga Negosiasi</span>
                                         @endif
                                     </div>
                                 </div>
                             </td>
-                            <td>Rp {{ number_format($item->price, 0, ',', '.') }}</td>
+                            <td>Rp {{ number_format($item->harga, 0, ',', '.') }}</td>
                             <td>
-                                <input type="number" value="{{ $item->quantity }}" class="form-control form-control-sm text-center" readonly style="width: 50px;">
+                                <input type="number" value="{{ $item->kuantitas }}" class="form-control form-control-sm text-center" readonly style="width: 50px;">
                             </td>
                             <td class="text-end fw-bold">
                                 Rp {{ number_format($subtotal, 0, ',', '.') }}
@@ -84,7 +87,7 @@
                     <tr>
                         <td colspan="5" class="text-end border-0">
                             <a href="{{ route('shop') }}" class="btn btn-outline-secondary me-2">
-                                <i class="bi bi-arrow-left"></i> Kembali
+                                <i class="bi bi-arrow-left"></i> Kembali Belanja
                             </a>
                             <a href="{{ route('checkout.index') }}" class="btn btn-dark px-4">
                                 Checkout <i class="bi bi-arrow-right"></i>

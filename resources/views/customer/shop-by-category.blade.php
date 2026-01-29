@@ -5,10 +5,12 @@
     .product-card {
         transition: transform 0.3s ease, box-shadow 0.3s ease; 
     }
+
     .product-card:hover {
         transform: translateY(-8px); 
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; 
     }
+
     .product-sold-out {
         opacity: 0.6;
         filter: grayscale(100%); 
@@ -35,20 +37,13 @@
         opacity: 0.6; 
         filter: grayscale(100%); 
     }
-    .btn-custom {
-        background-color: var(--primary-color);
-        color: white;
-        transition: opacity 0.2s;
-    }
-    .btn-custom:hover {
-        color: white;
-        opacity: 0.9;
-    }
 </style>
 @endsection
 
 @section('content')
+
 <div class="container my-5">
+
     <div class="row justify-content-center mb-4">
         <div class="col-md-6">
              @include('layouts.partials.search-bar')
@@ -75,26 +70,32 @@
         @forelse ($products as $product)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
                 <div class="card h-100 border-0 shadow-sm product-card {{ $product->stok == 0 ? 'product-sold-out' : '' }}">
+
                     <div class="position-relative">
                         <a href="{{ route('product.show', $product) }}">
-                            <img src="{{ asset('storage/' . $product->foto_produk) }}" 
-                                 class="card-img-top" 
-                                 alt="{{ $product->nama_produk }}" 
-                                 style="height: 300px; object-fit: cover;">
+                            <img src="{{ asset($product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="height: 300px; object-fit: cover;">
                         </a>
+
                         @if($product->stok == 0)
                             <div class="sold-out-badge">SOLD OUT</div>
                         @endif
                     </div>
+
                     <div class="card-body d-flex flex-column">
+
                         <a href="{{ route('product.show', $product) }}" class="text-decoration-none" style="color: inherit;">
                             <h5 class="card-title" style="font-family: 'Playfair Display', serif;">{{ $product->nama_produk }}</h5>
                         </a>
+
+                        {{-- <p class="card-text text-muted">{{ $product->category->nama_kategori }}</p> --}} 
+                        
                         <p class="card-text fw-bold mt-auto fs-5" style="color: var(--primary-color);">
                             Rp {{ number_format($product->harga, 0, ',', '.') }}
                         </p>
+                        
                         <div class="mt-3 d-grid gap-2"> 
                             <a href="{{ route('product.show', $product) }}" class="btn btn-outline-dark">Detail</a>
+                            
                             @if($product->stok > 0)
                                 @auth
                                 <form action="{{ route('cart.store') }}" method="POST" class="d-grid">
@@ -113,6 +114,7 @@
                                 <button class="btn btn-secondary" disabled>Stok Habis</button>
                             @endif
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -127,4 +129,5 @@
         @endforelse 
     </div>
 </div>
+
 @endsection

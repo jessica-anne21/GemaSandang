@@ -9,10 +9,8 @@ class Cart extends Model
 {
     use HasFactory;
 
-    // Nama tabel di database
     protected $table = 'carts';
 
-    // Kolom yang boleh diisi (Mass Assignment)
     protected $fillable = [
         'user_id',
         'product_id',

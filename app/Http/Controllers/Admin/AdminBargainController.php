@@ -26,23 +26,22 @@ class AdminBargainController extends Controller
     public function update(Request $request, $id)
     {
         $bargain = Bargain::findOrFail($id);
-
+    
+        if ($bargain->status !== 'pending') {
+            return back()->with('error', 'Tawaran ini sudah diproses dan tidak dapat diubah kembali.');
+        }
+    
         $request->validate([
             'status' => 'required|in:accepted,rejected',
             'catatan_admin' => 'nullable|string|max:255',
         ]);
-
+    
         $bargain->update([
             'status' => $request->status,
             'catatan_admin' => $request->catatan_admin,
         ]);
-
-        return back()->with(
-            'success',
-            $request->status === 'accepted'
-                ? 'Tawaran berhasil diterima.'
-                : 'Tawaran berhasil ditolak.'
-        );
+    
+        return back()->with('success', 'Status tawaran berhasil diperbarui.');
     }
 
     public function reject(Request $request, $id)

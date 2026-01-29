@@ -71,6 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('customer.bargains.index');
     Route::post('/cart/bargain', [CartController::class, 'addFromBargain'])
     ->name('cart.add.bargain');
+
 });
 
 Route::get('/cart', [CartController::class, 'index'])->middleware('auth')->name('cart.index');

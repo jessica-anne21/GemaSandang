@@ -70,8 +70,8 @@
                                             <div class="small text-muted">Gema Sandang Official</div>
                                         </div>
                                         <div class="text-end">
-                                            <h5 class="mb-0 fw-bold text-dark">123-456-7890</h5>
-                                            <small class="text-primary" style="cursor: pointer;" onclick="navigator.clipboard.writeText('1234567890'); alert('Nomor rekening berhasil disalin!');">Salin</small>
+                                            <h5 class="mb-0 fw-bold text-dark">3211026501</h5>
+                                            <small class="text-primary" style="cursor: pointer;" onclick="navigator.clipboard.writeText('3211026501'); alert('Nomor rekening berhasil disalin!');">Salin</small>
                                         </div>
                                     </div>
                                     <div class="alert alert-warning mb-0">

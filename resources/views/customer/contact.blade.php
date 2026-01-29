@@ -41,7 +41,7 @@
                     </div>
                     <h3 class="card-title fw-bold mb-3">WhatsApp</h3>
                     <p class="text-muted mb-4">
-                        Butuh respon cepat? Chat admin kami untuk konfirmasi pesanan, tanya stok, atau komplain.
+                        Butuh respon cepat? Chat admin kami untuk konfirmasi pesanan atau komplain.
                     </p>
 
                     <a href="https://wa.me/6282121349200?text=Halo%20Admin%20Gema%20Sandang,%20saya%20tertarik%20dengan%20produk%20Anda..." target="_blank" class="btn btn-outline-success btn-lg w-100 rounded-pill">
