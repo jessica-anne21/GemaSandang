@@ -42,7 +42,7 @@
                             <td class="p-3 ps-4 fw-bold">#{{ $product->id }}</td>
                             <td class="p-3 ps-4">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset($product->foto_produk) }}" 
+                                    <img src="{{ asset('storage/' . $product->foto_produk) }}" 
                                          class="rounded-3 shadow-sm border me-3" 
                                          style="width: 55px; height: 55px; object-fit: cover;">
                                     <div>
