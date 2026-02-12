@@ -73,7 +73,7 @@
 
                     <div class="position-relative">
                         <a href="{{ route('product.show', $product) }}">
-                            <img src="{{ asset($product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="height: 300px; object-fit: cover;">
+                            <img src="{{ asset('storage/' . $product->foto_produk) }}" class="card-img-top" alt="{{ $product->nama_produk }}" style="height: 300px; object-fit: cover;">
                         </a>
 
                         @if($product->stok == 0)
